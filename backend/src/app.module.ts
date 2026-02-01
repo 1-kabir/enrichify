@@ -11,6 +11,7 @@ import { WebsetsModule } from './websets/websets.module';
 import { CitationsModule } from './citations/citations.module';
 import { ExportModule } from './export/export.module';
 import { EnrichmentModule } from './enrichment/enrichment.module';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { EnrichmentModule } from './enrichment/enrichment.module';
     CitationsModule,
     ExportModule,
     EnrichmentModule,
+    ChatModule,
   ],
 })
 export class AppModule {}
