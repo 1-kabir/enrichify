@@ -84,7 +84,7 @@ export class EnrichmentProcessor extends WorkerHost {
           enrichedCells.push(savedCell);
         }
 
-        await job.updateProgress((i + 1) / totalRows * 100);
+        await job.updateProgress(((i + 1) / totalRows) * 100);
       } catch (error) {
         this.logger.error(`Error enriching cell at row ${row}: ${error.message}`);
       }
