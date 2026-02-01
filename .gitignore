@@ -1,8 +1,7 @@
 # Dependencies
 node_modules/
-*.lock
 
-# Environment variables
+# Environment variables (NEVER commit .env with secrets)
 .env
 .env.local
 .env.development.local
@@ -30,11 +29,6 @@ Icon?
 .Trashes
 *.nfs
 
-# Docker
-.dockerignore
-!frontend/Dockerfile
-!backend/Dockerfile
-
 # IDE
 .vscode/
 .idea/
@@ -46,11 +40,11 @@ Icon?
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
 
 # Coverage
 coverage/
-!.nyc_output
-.nyc_output
+.nyc_output/
 
 # Temporary files
 tmp/
@@ -65,3 +59,12 @@ build/
 # Sensitive data
 secrets/
 credentials.json
+config.yml
+
+# Docker (except Dockerfiles)
+.dockerignore
+
+# Package manager lock files (keep committed for reproducibility)
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml

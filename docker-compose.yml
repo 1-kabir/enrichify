@@ -6,11 +6,13 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - "8080:3000"
     depends_on:
       - backend
+    env_file:
+      - .env
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:3001
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:3001}
     volumes:
       - ./frontend:/app
       - /app/node_modules
@@ -25,11 +27,23 @@ services:
     depends_on:
       - postgres
       - redis
+    env_file:
+      - .env
     environment:
-      - DATABASE_URL=postgresql://enrichify:password@postgres:5432/enrichify
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - NODE_ENV=development
+      - DATABASE_URL=${DATABASE_URL:-postgresql://enrichify:password@postgres:5432/enrichify}
+      - REDIS_HOST=${REDIS_HOST:-redis}
+      - REDIS_PORT=${REDIS_PORT:-6379}
+      - NODE_ENV=${NODE_ENV:-development}
+      - JWT_SECRET=${JWT_SECRET}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - EXA_API_KEY=${EXA_API_KEY}
+      - BRAVE_API_KEY=${BRAVE_API_KEY}
+      - TAVILY_API_KEY=${TAVILY_API_KEY}
+      - SERPER_API_KEY=${SERPER_API_KEY}
     volumes:
       - ./backend:/app
       - /app/node_modules
@@ -40,9 +54,9 @@ services:
     ports:
       - "5432:5432"
     environment:
-      - POSTGRES_DB=enrichify
-      - POSTGRES_USER=enrichify
-      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=${DATABASE_NAME:-enrichify}
+      - POSTGRES_USER=${DATABASE_USER:-enrichify}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD:-password}
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
