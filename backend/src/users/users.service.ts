@@ -6,11 +6,11 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import * as bcrypt from 'bcrypt';
 import { User } from '../entities/user.entity';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { UserResponseDto } from '../dto/user-response.dto';
+import { AuthUtils } from '../utils/auth.utils';
 
 @Injectable()
 export class UsersService {
@@ -30,7 +30,7 @@ export class UsersService {
       throw new ConflictException('Username or email already exists');
     }
 
-    const hashedPassword = await this.hashPassword(password);
+    const hashedPassword = await AuthUtils.hashPassword(password);
 
     const user = this.userRepository.create({
       username,
@@ -41,12 +41,12 @@ export class UsersService {
 
     const savedUser = await this.userRepository.save(user);
 
-    return this.toUserResponse(savedUser);
+    return AuthUtils.toUserResponse(savedUser);
   }
 
   async findAll(): Promise<UserResponseDto[]> {
     const users = await this.userRepository.find();
-    return users.map((user) => this.toUserResponse(user));
+    return users.map((user) => AuthUtils.toUserResponse(user));
   }
 
   async findOne(id: string): Promise<UserResponseDto> {
@@ -56,7 +56,7 @@ export class UsersService {
       throw new NotFoundException('User not found');
     }
 
-    return this.toUserResponse(user);
+    return AuthUtils.toUserResponse(user);
   }
 
   async update(id: string, updateUserDto: UpdateUserDto): Promise<UserResponseDto> {
@@ -78,7 +78,7 @@ export class UsersService {
       }
 
       const existingUser = await this.userRepository.findOne({
-        where: whereConditions,
+        where: whereConditions.length === 1 ? whereConditions[0] : whereConditions,
       });
 
       if (existingUser && existingUser.id !== id) {
@@ -87,14 +87,14 @@ export class UsersService {
     }
 
     if (updateUserDto.password) {
-      updateUserDto.password = await this.hashPassword(updateUserDto.password);
+      updateUserDto.password = await AuthUtils.hashPassword(updateUserDto.password);
     }
 
     Object.assign(user, updateUserDto);
 
     const updatedUser = await this.userRepository.save(user);
 
-    return this.toUserResponse(updatedUser);
+    return AuthUtils.toUserResponse(updatedUser);
   }
 
   async remove(id: string): Promise<void> {
@@ -105,22 +105,5 @@ export class UsersService {
     }
 
     await this.userRepository.remove(user);
-  }
-
-  private async hashPassword(password: string): Promise<string> {
-    const saltRounds = 10;
-    return bcrypt.hash(password, saltRounds);
-  }
-
-  private toUserResponse(user: User): UserResponseDto {
-    return {
-      id: user.id,
-      username: user.username,
-      email: user.email,
-      role: user.role,
-      isActive: user.isActive,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-    };
   }
 }

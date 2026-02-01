@@ -7,12 +7,12 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
 import { User } from '../entities/user.entity';
 import { RegisterDto } from '../dto/register.dto';
 import { LoginDto } from '../dto/login.dto';
 import { LoginResponseDto } from '../dto/login-response.dto';
 import { UserResponseDto } from '../dto/user-response.dto';
+import { AuthUtils } from '../utils/auth.utils';
 
 @Injectable()
 export class AuthService {
@@ -33,7 +33,7 @@ export class AuthService {
       throw new ConflictException('Username or email already exists');
     }
 
-    const hashedPassword = await this.hashPassword(password);
+    const hashedPassword = await AuthUtils.hashPassword(password);
 
     const user = this.userRepository.create({
       username,
@@ -43,7 +43,7 @@ export class AuthService {
 
     const savedUser = await this.userRepository.save(user);
 
-    return this.toUserResponse(savedUser);
+    return AuthUtils.toUserResponse(savedUser);
   }
 
   async login(loginDto: LoginDto): Promise<LoginResponseDto> {
@@ -61,7 +61,7 @@ export class AuthService {
       throw new UnauthorizedException('Account is inactive');
     }
 
-    const isPasswordValid = await this.comparePasswords(password, user.password);
+    const isPasswordValid = await AuthUtils.comparePasswords(password, user.password);
 
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
@@ -83,27 +83,6 @@ export class AuthService {
         email: user.email,
         role: user.role,
       },
-    };
-  }
-
-  async hashPassword(password: string): Promise<string> {
-    const saltRounds = 10;
-    return bcrypt.hash(password, saltRounds);
-  }
-
-  async comparePasswords(plainPassword: string, hashedPassword: string): Promise<boolean> {
-    return bcrypt.compare(plainPassword, hashedPassword);
-  }
-
-  toUserResponse(user: User): UserResponseDto {
-    return {
-      id: user.id,
-      username: user.username,
-      email: user.email,
-      role: user.role,
-      isActive: user.isActive,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
     };
   }
 
