@@ -153,10 +153,11 @@ export class ExportService {
       mkdirSync(exportDir, { recursive: true });
     }
 
-    const filepath = join(exportDir, `${filename}-${Date.now()}.csv`);
+    const timestamp = Date.now();
+    const filepath = join(exportDir, `${filename}-${timestamp}.csv`);
     writeFileSync(filepath, csv);
 
-    return `/exports/${filename}-${Date.now()}.csv`;
+    return `/exports/${filename}-${timestamp}.csv`;
   }
 
   private async exportToXLSX(data: any[][], filename: string): Promise<string> {
@@ -169,10 +170,11 @@ export class ExportService {
       mkdirSync(exportDir, { recursive: true });
     }
 
-    const filepath = join(exportDir, `${filename}-${Date.now()}.xlsx`);
+    const timestamp = Date.now();
+    const filepath = join(exportDir, `${filename}-${timestamp}.xlsx`);
     XLSX.writeFile(workbook, filepath);
 
-    return `/exports/${filename}-${Date.now()}.xlsx`;
+    return `/exports/${filename}-${timestamp}.xlsx`;
   }
 
   private async exportToGoogleSheets(
