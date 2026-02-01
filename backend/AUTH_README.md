@@ -242,8 +242,10 @@ async adminRoute() {
 
 ## Environment Variables
 
+**Required Environment Variables:**
+
 ```env
-# JWT Configuration
+# JWT Configuration (REQUIRED)
 JWT_SECRET=your-secret-key-change-in-production
 
 # Database Configuration
@@ -257,6 +259,8 @@ DATABASE_NAME=enrichify
 REDIS_HOST=localhost
 REDIS_PORT=6379
 ```
+
+**Important:** `JWT_SECRET` is required and the application will throw an error on startup if not set. Use a strong, randomly generated secret in production.
 
 ## Validation
 
