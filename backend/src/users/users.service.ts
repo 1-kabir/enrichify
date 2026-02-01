@@ -67,11 +67,18 @@ export class UsersService {
     }
 
     if (updateUserDto.username || updateUserDto.email) {
+      const whereConditions = [];
+      
+      if (updateUserDto.username) {
+        whereConditions.push({ username: updateUserDto.username });
+      }
+      
+      if (updateUserDto.email) {
+        whereConditions.push({ email: updateUserDto.email });
+      }
+
       const existingUser = await this.userRepository.findOne({
-        where: [
-          { username: updateUserDto.username },
-          { email: updateUserDto.email },
-        ],
+        where: whereConditions,
       });
 
       if (existingUser && existingUser.id !== id) {

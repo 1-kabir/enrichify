@@ -12,7 +12,9 @@ import { JwtStrategy } from '../strategies/jwt.strategy';
     TypeOrmModule.forFeature([User]),
     PassportModule,
     JwtModule.register({
-      secret: process.env.JWT_SECRET || 'your-secret-key-change-in-production',
+      secret: process.env.JWT_SECRET || (() => {
+        throw new Error('JWT_SECRET environment variable is not set');
+      })(),
       signOptions: { expiresIn: '24h' },
     }),
   ],
