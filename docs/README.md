@@ -1,18 +1,21 @@
-# Documentation
+# Developer Documentation
 
-This directory contains implementation documentation for various Enrichify features. These are reference documents for developers and will be optimized over time.
+This directory contains guides for developers working on Enrichify.
 
-## Files
+## 📚 Guides
 
-- **AUTH_README.md** - Authentication system documentation
-- **CHAT_README.md** - Chat module implementation details
-- **CHAT_IMPLEMENTATION_SUMMARY.md** - Summary of chat implementation
-- **CHAT_TESTING.md** - Chat testing guide
-- **WEBSETS_README.md** - Websets (data enrichment) documentation
-- **PROVIDERS_README.md** - Search and LLM provider configuration
-- **SECURITY_SUMMARY.md** - Security overview
-- **IMPLEMENTATION_COMPLETE.md** - Initial implementation checklist
-- **IMPLEMENTATION_COMPLETE_WEBSETS.md** - Websets implementation checklist
-- **IMPLEMENTATION_SUMMARY.md** - General implementation summary
-- **VERIFICATION_CHECKLIST.md** - Feature verification checklist
-- **QUICKSTART.md** - Quick start guide
+### Adding Custom Providers
+
+- **[ADDING_LLM_PROVIDERS.md](ADDING_LLM_PROVIDERS.md)** – Integrate new LLM providers (OpenAI-compatible or custom SDKs)
+- **[ADDING_SEARCH_PROVIDERS.md](ADDING_SEARCH_PROVIDERS.md)** – Integrate new search providers (Google, DuckDuckGo, custom APIs, etc.)
+
+### Architecture & Reference
+
+- Implementation details and architecture notes will be added here as the project evolves.
+
+## 🚀 Quick Links
+
+- **[Contributing](../CONTRIBUTING.md)** – Contribution guidelines
+- **[Quick Start](../QUICKSTART.md)** – Setup and installation for end users
+- **[Main README](../README.md)** – Project overview and features
+

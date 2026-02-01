@@ -2,85 +2,56 @@
 
 **Open-source, multi-agent data enrichment for leads and professional data.**
 
-Turn raw web data into **verified, structured, and actionable** leads—using **any search provider** (Exa, Tavily, Google, etc.) with **Bring Your Own Key (BYOK)** support.
+Turn raw web data into **verified, structured, and actionable** leads—using **any search provider** (Exa, Tavily, Brave, etc.) with **Bring Your Own Key (BYOK)** support.
 
 ---
 
 ## 🚀 **What is Enrichify?**
+
 Enrichify is a **scalable, self-hostable** system for:
-- **Enriching leads** (emails, social profiles, company data).
-- **Aggregating search results** from multiple providers (Exa, Firecrawl, Google, etc.).
-- **Verifying data** with customizable agents.
-- **Bring Your Own Key (BYOK)** – Use your existing API keys for any provider.
+- **Enriching leads** (emails, social profiles, company data)
+- **Aggregating search results** from multiple providers
+- **Processing with AI/LLM** for data verification and enrichment
+- **Bring Your Own Key (BYOK)** – Use your existing API keys for any provider
 
 **100% open-source** – No locked features. Deploy anywhere.
 
 ---
 
 ## 🛠️ **Features**
-✅ **Multi-Provider Search** – Plug in Exa, Tavily, Google, or add your own.
-✅ **Bring Your Own Key (BYOK)** – Securely use your API keys.
-✅ **Queue System** – Async job processing with retries.
-✅ **Self-Hostable** – Run locally or deploy with Docker.
-✅ **Extensible** – Add new providers in minutes.
+
+✅ **Multi-Provider Search** – Exa, Tavily, Brave, Serper, SearXNG, or add your own  
+✅ **Multi-Provider LLM** – OpenAI, Claude, Gemini, Groq, Mistral, OpenRouter, or custom  
+✅ **Bring Your Own Key (BYOK)** – Securely use your API keys  
+✅ **Queue System** – Async job processing with retries (BullMQ)  
+✅ **Real-time Chat** – WebSocket-powered conversations  
+✅ **Data Export** – CSV, JSON, and custom formats  
+✅ **Self-Hostable** – Run locally or deploy with Docker  
+✅ **Extensible** – Add new providers in minutes  
 
 ---
 
-## 📋 **About Exa Websets**
+## 🤖 **Supported Providers**
 
-Exa Websets is an AI-powered data search and enrichment platform designed for professionals who need exact, verified data results. It transforms the internet into a structured dataset that can be filtered and searched using natural language queries.
+### LLM Providers
+Built-in exclusive integrations:
+- **OpenAI** (GPT-4, GPT-3.5)
+- **Anthropic Claude** (Claude 3 Opus, Sonnet, Haiku)
+- **Google Gemini** (Pro)
+- **Groq** (Mixtral, LLaMA)
+- **Mistral** (Mistral Large)
+- **OpenRouter** (Multi-model proxy)
+- **OpenAI-compatible** (Local models, vLLM, etc.)
 
-### Key Capabilities:
-- **Semantic Search**: Find relevant information using natural language instead of keywords
-- **Structured Data Extraction**: Extract structured data from web pages into tabular formats
-- **Data Verification**: AI-powered validation of extracted information
-- **Customizable Filters**: Apply multiple criteria to refine search results
-- **API Access**: Programmatically access and manipulate datasets
-- **Large-Scale Processing**: Handle tens of thousands of results efficiently
+### Search Providers
+Built-in integrations:
+- **Exa** – AI-powered semantic search
+- **Tavily** – Search & research API
+- **Brave Search** – Privacy-focused search
+- **Serper** – Google search API
+- **SearXNG** – Self-hosted metasearch engine
 
-### Core Features:
-- Natural language semantic search
-- Structured "Webset" tables with enrichment columns
-- Multiple search modes and filtering options
-- Support for parsing over 1000 web pages
-- Advanced search capabilities for complex queries
-
-Enrichify aims to provide an open-source, self-hostable alternative to Exa Websets with similar capabilities but with the flexibility of BYOK (Bring Your Own Keys) and extensibility to support multiple search providers.
-
----
-
-## 🏗️ **Architecture**
-
-The project follows a microservices architecture with:
-
-- **Frontend**: Next.js application with TypeScript, Tailwind CSS, shadcn/ui, and modern UI components
-- **Backend**: NestJS API server with PostgreSQL database
-- **Queue System**: BullMQ for handling asynchronous jobs and data processing
-- **Database**: PostgreSQL for storing structured data and metadata
-- **Deployment**: Docker Compose for easy local development and deployment
-
----
-
-## 🚀 **Getting Started**
-
-### Prerequisites
-- Docker & Docker Compose v2
-- Node.js (for local development)
-- PostgreSQL client (optional)
-
-### Quick Start
-```bash
-# Clone the repository
-git clone <repository-url>
-cd enrichify
-
-# Start the services
-docker-compose up -d
-
-# Access the application
-# Frontend: http://localhost:3000
-# Backend: http://localhost:3001
-```
+> **Custom providers?** See [CONTRIBUTING_PROVIDERS.md](docs/CONTRIBUTING_PROVIDERS.md) to add your own.
 
 ---
 
@@ -88,32 +59,85 @@ docker-compose up -d
 
 ```
 enrichify/
-├── docker-compose.yml          # Docker orchestration
-├── frontend/                   # Next.js frontend application
+├── frontend/                   # Next.js React application
 │   ├── app/                    # App Router pages
 │   ├── components/             # Reusable UI components
-│   ├── lib/                    # Utility functions
-│   ├── public/                 # Static assets
-│   └── package.json            # Dependencies
-├── backend/                    # NestJS backend application
+│   ├── lib/                    # Utility functions & API client
+│   └── package.json
+├── backend/                    # NestJS API server
 │   ├── src/
-│   │   ├── app.module.ts       # Main application module
-│   │   ├── main.ts             # Application entry point
-│   │   ├── controllers/        # API controllers
-│   │   ├── services/           # Business logic services
-│   │   └── entities/           # Database entities
-│   └── package.json            # Dependencies
-├── shared/                     # Shared types and utilities
-└── docker/
-    ├── postgres/               # PostgreSQL configuration
-    └── redis/                  # Redis configuration for BullMQ
+│   │   ├── modules/            # Feature modules (auth, chat, websets, etc.)
+│   │   ├── providers/          # LLM & Search provider integrations
+│   │   ├── entities/           # TypeORM database entities
+│   │   └── main.ts             # Application entry point
+│   └── package.json
+├── shared/                     # Shared types/interfaces
+├── docker/                     # Docker configurations
+├── docs/                       # Developer & contribution guides
+├── config.yml.example          # Configuration template
+├── .env.example                # Environment variables template
+└── docker-compose.yml          # Local development orchestration
 ```
+
+---
+
+## 🚀 **Quick Start**
+
+### Using Docker Compose (Recommended)
+
+```bash
+# Clone the repository
+git clone <repository-url>
+cd enrichify
+
+# Create environment file
+cp .env.example .env
+# Edit .env and add your API keys
+
+# Start all services
+docker-compose up -d
+
+# Access the application
+# Frontend: http://localhost:8080
+# Backend API: http://localhost:3001
+```
+
+> For detailed setup instructions, see [QUICKSTART.md](QUICKSTART.md)
+
+---
+
+## 📖 **Documentation**
+
+- **[QUICKSTART.md](QUICKSTART.md)** – Setup, installation, and getting started
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** – How to contribute
+- **[docs/ADDING_LLM_PROVIDERS.md](docs/ADDING_LLM_PROVIDERS.md)** – Guide for adding custom LLM providers
+- **[docs/ADDING_SEARCH_PROVIDERS.md](docs/ADDING_SEARCH_PROVIDERS.md)** – Guide for adding custom search providers
+
+---
+
+## 🏗️ **Architecture**
+
+**Tech Stack:**
+- **Frontend**: Next.js 14, React 18, TypeScript, Tailwind CSS, Radix UI
+- **Backend**: NestJS, TypeORM, PostgreSQL, Redis, BullMQ
+- **Infrastructure**: Docker, Docker Compose
+
+**Key Components:**
+- **API**: RESTful endpoints for providers, websets, chat, and exports
+- **Real-time**: WebSocket gateway for live chat and updates
+- **Queue System**: BullMQ for async enrichment jobs
+- **Database**: PostgreSQL for structured data, Redis for caching & queues
+- **Auth**: JWT-based authentication with role-based access control (RBAC)
 
 ---
 
 ## 🤝 **Contributing**
 
-We welcome contributions! Please see our [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to get started.
+We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+Want to add a new LLM or Search provider? Check the provider-specific guides:
+- [Adding LLM Providers](docs/ADDING_LLM_PROVIDERS.md)
+- [Adding Search Providers](docs/ADDING_SEARCH_PROVIDERS.md)
 
 ---
 
