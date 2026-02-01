@@ -1,0 +1,28 @@
+{
+  "extends": "@biomejs/biome/configuration",
+  "files": {
+    "ignore": [
+      "node_modules",
+      ".next",
+      "dist",
+      "build"
+    ]
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single",
+      "semicolons": "asNeeded"
+    }
+  },
+  "json": {
+    "formatter": {
+      "trailingCommas": "none"
+    }
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true
+    }
+  }
+}
