@@ -35,10 +35,11 @@ export default function LoginPage() {
         title: "Success",
         description: "You have been logged in successfully.",
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } } };
       toast({
         title: "Error",
-        description: error.response?.data?.message || "Failed to login",
+        description: err.response?.data?.message || "Failed to login",
         variant: "destructive",
       });
     } finally {
