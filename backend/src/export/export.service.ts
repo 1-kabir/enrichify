@@ -121,7 +121,7 @@ export class ExportService {
   }
 
   private transformCellsToTable(webset: Webset, cells: WebsetCell[]): any[][] {
-    const headers = webset.columnDefinitions.map((col) => col.name);
+    const headers = webset.columnDefinitions.map((col) => this.sanitizeValue(col.name));
     const rows: any[][] = [headers];
 
     const cellsByRow = new Map<number, Map<string, string>>();
@@ -130,7 +130,7 @@ export class ExportService {
       if (!cellsByRow.has(cell.row)) {
         cellsByRow.set(cell.row, new Map());
       }
-      cellsByRow.get(cell.row).set(cell.column, cell.value || '');
+      cellsByRow.get(cell.row).set(cell.column, this.sanitizeValue(cell.value) || '');
     }
 
     const sortedRows = Array.from(cellsByRow.keys()).sort((a, b) => a - b);
@@ -142,6 +142,11 @@ export class ExportService {
     }
 
     return rows;
+  }
+
+  private sanitizeValue(value: string): string {
+    if (!value) return '';
+    return String(value).substring(0, 10000);
   }
 
   private async exportToCSV(data: any[][], filename: string): Promise<string> {
