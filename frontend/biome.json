@@ -1,5 +1,5 @@
 {
-  "extends": "@biomejs/biome/configuration",
+  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
   "files": {
     "ignore": [
       "node_modules",
@@ -8,10 +8,14 @@
       "build"
     ]
   },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space"
+  },
   "javascript": {
     "formatter": {
-      "quoteStyle": "single",
-      "semicolons": "asNeeded"
+      "quoteStyle": "double",
+      "semicolons": "always"
     }
   },
   "json": {

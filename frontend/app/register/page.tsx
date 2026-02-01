@@ -47,10 +47,11 @@ export default function RegisterPage() {
         title: "Success",
         description: "Account created successfully.",
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } } };
       toast({
         title: "Error",
-        description: error.response?.data?.message || "Failed to register",
+        description: err.response?.data?.message || "Failed to register",
         variant: "destructive",
       });
     } finally {
