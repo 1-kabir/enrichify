@@ -4,6 +4,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { BullModule } from '@nestjs/bullmq';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
+import { ConfigurationModule } from './config/configuration.module';
+import { RateLimitModule } from './rate-limit/rate-limit.module';
+import { ProvidersModule } from './providers/providers.module';
 
 @Module({
   imports: [
@@ -26,6 +29,9 @@ import { UsersModule } from './users/users.module';
     }),
     AuthModule,
     UsersModule,
+    ConfigurationModule,
+    RateLimitModule,
+    ProvidersModule,
   ],
 })
 export class AppModule {}
