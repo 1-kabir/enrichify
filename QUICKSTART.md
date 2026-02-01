@@ -271,9 +271,8 @@ docker-compose up -d    # Fresh start
 
 ## 📚 **Next Steps**
 
-- **[Adding Custom Providers](docs/ADDING_LLM_PROVIDERS.md)** – Build your own integrations
-- **[API Documentation](docs/API.md)** – Full endpoint reference
-- **[Contributing](CONTRIBUTING.md)** – Help improve Enrichify
+- **[README.md](README.md)** – Project overview and features
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** – Help improve Enrichify
 - **[Issues](https://github.com/1-kabir/enrichify/issues)** – Report bugs or request features
 
 ---
