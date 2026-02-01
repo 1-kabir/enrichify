@@ -4,3 +4,8 @@ export * from './rate-limit.entity';
 export * from './llm-provider.entity';
 export * from './search-provider.entity';
 export * from './provider-usage.entity';
+export * from './webset.entity';
+export * from './webset-version.entity';
+export * from './webset-cell.entity';
+export * from './webset-citation.entity';
+export * from './webset-export.entity';

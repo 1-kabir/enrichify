@@ -7,6 +7,10 @@ import { UsersModule } from './users/users.module';
 import { ConfigurationModule } from './config/configuration.module';
 import { RateLimitModule } from './rate-limit/rate-limit.module';
 import { ProvidersModule } from './providers/providers.module';
+import { WebsetsModule } from './websets/websets.module';
+import { CitationsModule } from './citations/citations.module';
+import { ExportModule } from './export/export.module';
+import { EnrichmentModule } from './enrichment/enrichment.module';
 
 @Module({
   imports: [
@@ -32,6 +36,10 @@ import { ProvidersModule } from './providers/providers.module';
     ConfigurationModule,
     RateLimitModule,
     ProvidersModule,
+    WebsetsModule,
+    CitationsModule,
+    ExportModule,
+    EnrichmentModule,
   ],
 })
 export class AppModule {}
