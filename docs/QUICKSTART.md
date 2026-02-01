@@ -50,12 +50,12 @@ Choose your preferred setup method:
 
 4. **Start services:**
    ```bash
-   docker-compose up -d
+   docker compose up -d
    ```
 
 5. **Verify services are running:**
    ```bash
-   docker-compose ps
+   docker compose ps
    ```
    
    You should see 4 containers: `frontend`, `backend`, `postgres`, `redis`
@@ -66,8 +66,8 @@ Choose your preferred setup method:
 
 7. **Check logs** (if something goes wrong):
    ```bash
-   docker-compose logs -f backend   # Backend logs
-   docker-compose logs -f frontend  # Frontend logs
+   docker compose logs -f backend   # Backend logs
+   docker compose logs -f frontend  # Frontend logs
    ```
 
 ---
@@ -216,30 +216,30 @@ providers:
 
 ### Stopping Services
 ```bash
-docker-compose down
+docker compose down
 ```
 
 ### Restarting Services
 ```bash
-docker-compose restart
+docker compose restart
 ```
 
 ### Rebuilding After Changes
 ```bash
-docker-compose up -d --build
+docker compose up -d --build
 ```
 
 ### Viewing Logs
 ```bash
-docker-compose logs -f          # All services
-docker-compose logs -f backend  # Just backend
-docker-compose logs -f frontend # Just frontend
+docker compose logs -f          # All services
+docker compose logs -f backend  # Just backend
+docker compose logs -f frontend # Just frontend
 ```
 
 ### Resetting Database
 ```bash
-docker-compose down -v  # Removes volumes
-docker-compose up -d    # Fresh start
+docker compose down -v  # Removes volumes
+docker compose up -d    # Fresh start
 ```
 
 ---
@@ -251,7 +251,7 @@ docker-compose up -d    # Fresh start
 - Services might still be starting. Wait 10-15 seconds and refresh.
 
 ### "Database connection failed"
-- Check PostgreSQL is running: `docker-compose ps postgres`
+- Check PostgreSQL is running: `docker compose ps postgres`
 - Verify `DATABASE_URL` in `.env`
 
 ### "API key invalid"
@@ -261,7 +261,7 @@ docker-compose up -d    # Fresh start
 ### Frontend shows blank page
 - Check browser console for errors (F12 → Console)
 - Verify `NEXT_PUBLIC_API_URL` points to correct backend
-- Check backend logs: `docker-compose logs -f backend`
+- Check backend logs: `docker compose logs -f backend`
 
 ### Out of memory
 - Increase Docker memory in Docker Desktop settings
