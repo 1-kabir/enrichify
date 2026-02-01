@@ -16,6 +16,7 @@ export enum LLMProviderType {
   GROQ = 'groq',
   OPENROUTER = 'openrouter',
   VERCEL_AI = 'vercel-ai',
+  MISTRAL = 'mistral',
 }
 
 @Entity('llm_providers')

@@ -74,6 +74,16 @@ providers:
         defaultModel: anthropic/claude-3-opus
       rateLimit: 60
 
+    - name: Mistral
+      type: mistral
+      endpoint: https://api.mistral.ai/v1
+      apiKey: ${MISTRAL_API_KEY}
+      isActive: false
+      config:
+        defaultModel: mistral-large-latest
+      rateLimit: 80
+      dailyLimit: 1200
+
   # Search Providers
   search:
     - name: Exa
