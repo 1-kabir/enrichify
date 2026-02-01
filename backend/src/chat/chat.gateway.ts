@@ -140,7 +140,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         relations: ['cells', 'cells.citations'],
       });
 
-      const context = await this.buildWebsetContext(webset);
+      const context = await this.chatService.buildWebsetContext(webset);
 
       const previousMessages = await this.messageRepository.find({
         where: { conversationId: conversation.id },
@@ -151,7 +151,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const llmMessages = [
         {
           role: 'system',
-          content: this.buildSystemPrompt(webset, context),
+          content: this.chatService.buildSystemPrompt(webset, context),
         },
         ...previousMessages
           .slice(-10)
@@ -277,7 +277,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       relations: ['cells', 'cells.citations'],
     });
 
-    const context = await this.buildWebsetContext(webset);
+    const context = await this.chatService.buildWebsetContext(webset);
 
     const previousMessages = await this.messageRepository.find({
       where: { conversationId: conversation.id },
@@ -288,7 +288,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const llmMessages = [
       {
         role: 'system',
-        content: this.buildSystemPrompt(webset, context),
+        content: this.chatService.buildSystemPrompt(webset, context),
       },
       ...previousMessages
         .slice(-10)
@@ -329,77 +329,5 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     return llmResponse.content;
-  }
-
-  private async buildWebsetContext(webset: Webset): Promise<string> {
-    let context = `Webset: ${webset.name}\n`;
-    if (webset.description) {
-      context += `Description: ${webset.description}\n`;
-    }
-
-    context += `\nColumns:\n`;
-    webset.columnDefinitions.forEach((col) => {
-      context += `- ${col.name} (${col.type})${col.required ? ' [required]' : ''}\n`;
-    });
-
-    context += `\nTotal Rows: ${webset.rowCount}\n`;
-
-    const sampleCells = await this.cellRepository.find({
-      where: { websetId: webset.id },
-      take: 50,
-      relations: ['citations'],
-    });
-
-    if (sampleCells.length > 0) {
-      context += `\nSample Data (first ${Math.min(50, sampleCells.length)} cells):\n`;
-
-      const cellsByRow = new Map<number, WebsetCell[]>();
-      sampleCells.forEach((cell) => {
-        if (!cellsByRow.has(cell.row)) {
-          cellsByRow.set(cell.row, []);
-        }
-        cellsByRow.get(cell.row).push(cell);
-      });
-
-      let rowCount = 0;
-      for (const [row, cells] of cellsByRow.entries()) {
-        if (rowCount >= 5) break;
-        context += `\nRow ${row}:\n`;
-        cells.forEach((cell) => {
-          context += `  ${cell.column}: ${cell.value || '[empty]'}`;
-          if (cell.confidenceScore !== null && cell.confidenceScore !== undefined) {
-            context += ` (confidence: ${cell.confidenceScore.toFixed(2)})`;
-          }
-          if (cell.citations && cell.citations.length > 0) {
-            context += ` [${cell.citations.length} citation(s)]`;
-          }
-          context += '\n';
-        });
-        rowCount++;
-      }
-    }
-
-    return context;
-  }
-
-  private buildSystemPrompt(webset: Webset, context: string): string {
-    return `You are an AI assistant helping users interact with their webset data in Enrichify.
-
-${context}
-
-Your capabilities:
-1. Answer questions about the webset structure, columns, and data
-2. Provide information about specific cells, including their values and confidence scores
-3. Explain citations and sources used for specific cells
-4. Help users understand data quality and confidence levels
-5. Suggest enrichment operations when appropriate
-
-When asked about:
-- "What resources were used for cell X?": Provide citation information
-- "What is the confidence score of cell Y?": Provide confidence score and context
-- Cell data: Provide the value, confidence, and any available metadata
-- Enrichment: Explain how to enrich data but note that enrichment operations must be triggered separately
-
-Be concise, helpful, and data-focused. If you don't have information about a specific cell or row, say so clearly.`;
   }
 }

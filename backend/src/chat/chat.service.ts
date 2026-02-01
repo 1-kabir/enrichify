@@ -199,7 +199,7 @@ export class ChatService {
     return { userMessage, assistantMessage };
   }
 
-  private async buildWebsetContext(webset: Webset): Promise<string> {
+  async buildWebsetContext(webset: Webset): Promise<string> {
     let context = `Webset: ${webset.name}\n`;
     if (webset.description) {
       context += `Description: ${webset.description}\n`;
@@ -250,7 +250,7 @@ export class ChatService {
     return context;
   }
 
-  private buildSystemPrompt(webset: Webset, context: string): string {
+  buildSystemPrompt(webset: Webset, context: string): string {
     return `You are an AI assistant helping users interact with their webset data in Enrichify.
 
 ${context}
