@@ -1,0 +1,116 @@
+# Enrichify Configuration File
+# This file provides an alternative to environment variables for configuration.
+# Environment variables take precedence over values defined here.
+
+# Application Settings
+port: 3000
+
+# Database Configuration
+database:
+  host: localhost
+  port: 5432
+  username: enrichify
+  password: password
+  database: enrichify
+
+# Redis Configuration
+redis:
+  host: localhost
+  port: 6379
+
+# JWT Configuration
+jwt:
+  secret: your-secret-key
+  expiresIn: 7d
+
+# Provider Configuration (Optional)
+# Providers can also be managed via the API endpoints
+providers:
+  # LLM Providers
+  llm:
+    - name: OpenAI GPT-4
+      type: openai
+      apiKey: ${OPENAI_API_KEY}  # Can reference environment variables
+      isActive: true
+      config:
+        defaultModel: gpt-4
+      rateLimit: 60  # requests per minute
+      dailyLimit: 1000  # requests per day
+
+    - name: Anthropic Claude
+      type: claude
+      apiKey: ${ANTHROPIC_API_KEY}
+      isActive: true
+      config:
+        defaultModel: claude-3-sonnet-20240229
+      rateLimit: 50
+      dailyLimit: 800
+
+    - name: Google Gemini
+      type: gemini
+      apiKey: ${GOOGLE_API_KEY}
+      isActive: true
+      config:
+        defaultModel: gemini-pro
+      rateLimit: 60
+      dailyLimit: 1000
+
+    - name: Groq
+      type: groq
+      endpoint: https://api.groq.com/openai/v1
+      apiKey: ${GROQ_API_KEY}
+      isActive: true
+      config:
+        defaultModel: mixtral-8x7b-32768
+      rateLimit: 30
+      dailyLimit: 500
+
+    - name: OpenRouter
+      type: openrouter
+      endpoint: https://openrouter.ai/api/v1
+      apiKey: ${OPENROUTER_API_KEY}
+      isActive: false
+      config:
+        defaultModel: anthropic/claude-3-opus
+      rateLimit: 60
+
+  # Search Providers
+  search:
+    - name: Exa
+      type: exa
+      endpoint: https://api.exa.ai
+      apiKey: ${EXA_API_KEY}
+      isActive: true
+      rateLimit: 30
+      dailyLimit: 500
+
+    - name: Brave Search
+      type: brave
+      endpoint: https://api.search.brave.com/res/v1
+      apiKey: ${BRAVE_API_KEY}
+      isActive: true
+      rateLimit: 60
+      dailyLimit: 1000
+
+    - name: Tavily
+      type: tavily
+      endpoint: https://api.tavily.com
+      apiKey: ${TAVILY_API_KEY}
+      isActive: true
+      rateLimit: 50
+      dailyLimit: 800
+
+    - name: Serper
+      type: serper
+      endpoint: https://google.serper.dev
+      apiKey: ${SERPER_API_KEY}
+      isActive: false
+      rateLimit: 60
+      dailyLimit: 1000
+
+    - name: SearXNG (Self-hosted)
+      type: searxng
+      endpoint: http://localhost:8080
+      isActive: false
+      config:
+        timeout: 10000

@@ -2,6 +2,16 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BullModule } from '@nestjs/bullmq';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
+import { ConfigurationModule } from './config/configuration.module';
+import { RateLimitModule } from './rate-limit/rate-limit.module';
+import { ProvidersModule } from './providers/providers.module';
+import { WebsetsModule } from './websets/websets.module';
+import { CitationsModule } from './citations/citations.module';
+import { ExportModule } from './export/export.module';
+import { EnrichmentModule } from './enrichment/enrichment.module';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -22,6 +32,16 @@ import { BullModule } from '@nestjs/bullmq';
         port: parseInt(process.env.REDIS_PORT, 10) || 6379,
       },
     }),
+    AuthModule,
+    UsersModule,
+    ConfigurationModule,
+    RateLimitModule,
+    ProvidersModule,
+    WebsetsModule,
+    CitationsModule,
+    ExportModule,
+    EnrichmentModule,
+    ChatModule,
   ],
 })
 export class AppModule {}

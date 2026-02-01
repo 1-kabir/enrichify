@@ -2,8 +2,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
-    typedRoutes: true,
+    typedRoutes: false,
   },
-}
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;
