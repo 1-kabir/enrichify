@@ -51,7 +51,7 @@ Built-in integrations:
 - **Serper** – Google search API
 - **SearXNG** – Self-hosted metasearch engine
 
-> **Custom providers?** See [CONTRIBUTING_PROVIDERS.md](docs/CONTRIBUTING_PROVIDERS.md) to add your own.
+> **Want to add a custom provider?** See [docs/ADDING_LLM_PROVIDERS.md](docs/ADDING_LLM_PROVIDERS.md) (LLM) or [docs/ADDING_SEARCH_PROVIDERS.md](docs/ADDING_SEARCH_PROVIDERS.md) (Search).
 
 ---
 
