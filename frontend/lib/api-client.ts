@@ -1,6 +1,7 @@
 import axios, { type AxiosInstance, type AxiosError } from "axios";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
 
 class ApiClient {
   private client: AxiosInstance;
@@ -20,7 +21,10 @@ class ApiClient {
   private setupInterceptors() {
     this.client.interceptors.request.use(
       (config) => {
-        const token = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
+        const token =
+          typeof window !== "undefined"
+            ? localStorage.getItem("auth_token")
+            : null;
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
@@ -28,7 +32,7 @@ class ApiClient {
       },
       (error) => {
         return Promise.reject(error);
-      }
+      },
     );
 
     this.client.interceptors.response.use(
@@ -41,7 +45,7 @@ class ApiClient {
           }
         }
         return Promise.reject(error);
-      }
+      },
     );
   }
 

@@ -17,7 +17,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           className="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm md:hidden"
           onClick={() => setSidebarOpen(false)}
           onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
+            if (e.key === "Enter" || e.key === " ") {
               setSidebarOpen(false);
             }
           }}
@@ -31,7 +31,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       <div
         className={cn(
           "fixed inset-y-0 left-0 z-50 w-64 transform bg-background transition-transform duration-200 ease-in-out md:hidden",
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          sidebarOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >
         <div className="flex h-16 items-center justify-between border-b px-6">
