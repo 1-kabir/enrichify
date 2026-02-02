@@ -51,7 +51,7 @@ Built-in integrations:
 - **Serper** – Google search API
 - **SearXNG** – Self-hosted metasearch engine
 
-> **Want to add a custom provider?** See [docs/ADDING_LLM_PROVIDERS.md](docs/ADDING_LLM_PROVIDERS.md) (LLM) or [docs/ADDING_SEARCH_PROVIDERS.md](docs/ADDING_SEARCH_PROVIDERS.md) (Search).
+> **Want to add a custom provider?** See [Adding LLM Providers](docs/development/ADDING_LLM_PROVIDERS.md) or [Adding Search Providers](docs/development/ADDING_SEARCH_PROVIDERS.md).
 
 ---
 
@@ -102,16 +102,24 @@ docker-compose up -d
 # Backend API: http://localhost:3001
 ```
 
-> For detailed setup instructions, see [QUICKSTART.md](QUICKSTART.md)
+> For detailed setup instructions, see [Quick Start Guide](docs/guides/QUICKSTART.md)
 
 ---
 
 ## 📖 **Documentation**
 
-- **[QUICKSTART.md](QUICKSTART.md)** – Setup, installation, and getting started
-- **[CONTRIBUTING.md](CONTRIBUTING.md)** – How to contribute
-- **[docs/ADDING_LLM_PROVIDERS.md](docs/ADDING_LLM_PROVIDERS.md)** – Guide for adding custom LLM providers
-- **[docs/ADDING_SEARCH_PROVIDERS.md](docs/ADDING_SEARCH_PROVIDERS.md)** – Guide for adding custom search providers
+### User Guides
+- **[Quick Start Guide](docs/guides/QUICKSTART.md)** – Setup, installation, and getting started
+
+### Development
+- **[Architecture](docs/ARCHITECTURE.md)** – System architecture and design
+- **[Deployment Guide](docs/DEPLOYMENT.md)** – Production deployment instructions
+- **[Contributing](CONTRIBUTING.md)** – How to contribute to the project
+- **[Adding LLM Providers](docs/development/ADDING_LLM_PROVIDERS.md)** – Guide for adding custom LLM providers
+- **[Adding Search Providers](docs/development/ADDING_SEARCH_PROVIDERS.md)** – Guide for adding custom search providers
+
+### API Reference
+- **[API Documentation](docs/api/README.md)** – Complete REST API and WebSocket documentation
 
 ---
 
@@ -136,8 +144,8 @@ docker-compose up -d
 We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 Want to add a new LLM or Search provider? Check the provider-specific guides:
-- [Adding LLM Providers](docs/ADDING_LLM_PROVIDERS.md)
-- [Adding Search Providers](docs/ADDING_SEARCH_PROVIDERS.md)
+- [Adding LLM Providers](docs/development/ADDING_LLM_PROVIDERS.md)
+- [Adding Search Providers](docs/development/ADDING_SEARCH_PROVIDERS.md)
 
 ---
 
