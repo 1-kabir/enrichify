@@ -6,6 +6,8 @@ import {
   UseGuards,
   Request,
   ValidationPipe,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from '../dto/register.dto';
@@ -23,7 +25,11 @@ export class AuthController {
   async register(
     @Body(ValidationPipe) registerDto: RegisterDto,
   ): Promise<UserResponseDto> {
-    return this.authService.register(registerDto);
+    // Public registration disabled - users must be created by admins
+    throw new HttpException(
+      'Public registration is disabled. Contact an administrator to create your account.',
+      HttpStatus.FORBIDDEN,
+    );
   }
 
   @Post('login')

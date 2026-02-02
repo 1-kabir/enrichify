@@ -5,6 +5,8 @@ const nextConfig = {
   experimental: {
     typedRoutes: false,
   },
+  // Fix for reverse proxy origin header issues
+  skipTrailingSlashRedirect: true,
 };
 
 module.exports = nextConfig;
