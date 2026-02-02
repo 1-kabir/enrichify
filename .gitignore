@@ -67,4 +67,4 @@ config.yml
 # Package manager lock files (keep committed for reproducibility)
 # package-lock.json
 # yarn.lock
-# pnpm-lock.yaml
+# pnpm-lock.yaml.github/copilot-instructions.md
