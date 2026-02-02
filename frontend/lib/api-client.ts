@@ -4,7 +4,8 @@ import axios, { type AxiosInstance, type AxiosError } from "axios";
 // In development, connect directly to backend at :3001
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ||
-  (typeof window !== "undefined" && window.location.origin.includes("kabirstudios.com")
+  (typeof window !== "undefined" &&
+  window.location.origin.includes("kabirstudios.com")
     ? "/api"
     : "http://localhost:3001");
 

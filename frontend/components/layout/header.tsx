@@ -33,9 +33,9 @@ export function Header() {
           <div className="flex items-center gap-2">
             <ThemeToggle />
 
-            <Button 
-              variant="ghost" 
-              size="icon" 
+            <Button
+              variant="ghost"
+              size="icon"
               className="relative rounded-full hover:bg-accent"
             >
               <Bell className="h-5 w-5" />
@@ -45,8 +45,8 @@ export function Header() {
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   className="relative h-10 rounded-full pl-2 pr-3 hover:bg-accent"
                 >
                   <Avatar className="h-7 w-7 mr-2">
@@ -59,7 +59,10 @@ export function Header() {
                   </span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-64 shadow-smooth-lg">
+              <DropdownMenuContent
+                align="end"
+                className="w-64 shadow-smooth-lg"
+              >
                 <DropdownMenuLabel>
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium leading-none">
@@ -80,7 +83,7 @@ export function Header() {
                   <span>Settings</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem 
+                <DropdownMenuItem
                   onClick={logout}
                   className="cursor-pointer text-destructive focus:text-destructive"
                 >

@@ -81,10 +81,12 @@ export function Sidebar() {
                   : "text-muted-foreground hover:bg-accent hover:text-accent-foreground hover:shadow-smooth",
               )}
             >
-              <Icon className={cn(
-                "h-5 w-5 transition-transform group-hover:scale-110",
-                isActive && "drop-shadow-sm"
-              )} />
+              <Icon
+                className={cn(
+                  "h-5 w-5 transition-transform group-hover:scale-110",
+                  isActive && "drop-shadow-sm",
+                )}
+              />
               <span>{item.title}</span>
             </Link>
           );
@@ -94,11 +96,11 @@ export function Sidebar() {
       {/* Footer */}
       <div className="border-t border-border/50 p-4">
         <div className="rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 p-4 space-y-2">
-          <p className="text-xs font-medium text-foreground">
-            💡 Pro Tip
-          </p>
+          <p className="text-xs font-medium text-foreground">💡 Pro Tip</p>
           <p className="text-xs text-muted-foreground">
-            Use keyboard shortcuts to navigate faster. Press <kbd className="px-1.5 py-0.5 text-xs rounded bg-muted">?</kbd> to see all shortcuts.
+            Use keyboard shortcuts to navigate faster. Press{" "}
+            <kbd className="px-1.5 py-0.5 text-xs rounded bg-muted">?</kbd> to
+            see all shortcuts.
           </p>
         </div>
       </div>
