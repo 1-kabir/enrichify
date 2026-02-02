@@ -92,14 +92,7 @@ export default function LoginPage() {
               {isLoading ? "Signing in..." : "Sign in"}
             </Button>
             <p className="text-sm text-center text-muted-foreground">
-              Don't have an account?{" "}
-              <button
-                type="button"
-                onClick={() => router.push("/register")}
-                className="text-primary hover:underline"
-              >
-                Sign up
-              </button>
+              New users must be created by administrators
             </p>
           </CardFooter>
         </form>
