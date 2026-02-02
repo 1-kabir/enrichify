@@ -7,39 +7,39 @@
     /* Modern color palette - Light mode */
     --background: 0 0% 100%;
     --foreground: 222.2 47.4% 11.2%;
-    
+
     --card: 0 0% 100%;
     --card-foreground: 222.2 47.4% 11.2%;
-    
+
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 47.4% 11.2%;
-    
+
     /* Sophisticated blue-purple gradient */
     --primary: 262.1 83.3% 57.8%;
     --primary-foreground: 210 40% 98%;
-    
+
     --secondary: 220 14.3% 95.9%;
     --secondary-foreground: 222.2 47.4% 11.2%;
-    
+
     --muted: 220 14.3% 95.9%;
     --muted-foreground: 220 8.9% 46.1%;
-    
+
     --accent: 262.1 83.3% 97.8%;
     --accent-foreground: 262.1 83.3% 57.8%;
-    
+
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    
+
     --border: 220 13% 91%;
     --input: 220 13% 91%;
     --ring: 262.1 83.3% 57.8%;
-    
+
     --radius: 0.75rem;
-    
+
     /* Success color */
     --success: 142.1 76.2% 36.3%;
     --success-foreground: 355.7 100% 97.3%;
-    
+
     /* Warning color */
     --warning: 38 92% 50%;
     --warning-foreground: 48 96% 89%;
@@ -49,35 +49,35 @@
     /* Dark mode with refined aesthetics */
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
-    
+
     --card: 217.2 32.6% 17.5%;
     --card-foreground: 210 40% 98%;
-    
+
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
-    
+
     --primary: 263.4 70% 50.4%;
     --primary-foreground: 210 40% 98%;
-    
+
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
-    
+
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
-    
+
     --accent: 217.2 32.6% 17.5%;
     --accent-foreground: 210 40% 98%;
-    
+
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
-    
+
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 263.4 70% 50.4%;
-    
+
     --success: 142.1 70.6% 45.3%;
     --success-foreground: 144.3 61.2% 90.2%;
-    
+
     --warning: 38 92% 50%;
     --warning-foreground: 48 96% 89%;
   }
@@ -87,13 +87,18 @@
   * {
     @apply border-border;
   }
-  
+
   body {
     @apply bg-background text-foreground font-sans antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
-  
-  h1, h2, h3, h4, h5, h6 {
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply font-heading;
   }
 }
@@ -103,45 +108,42 @@
   .gradient-primary {
     @apply bg-gradient-to-br from-primary via-primary/90 to-primary/80;
   }
-  
+
   .gradient-secondary {
     @apply bg-gradient-to-br from-secondary via-secondary/90 to-secondary/80;
   }
-  
+
   .gradient-card {
     @apply bg-gradient-to-br from-card via-card to-card/95;
   }
-  
+
   /* Glass morphism effect */
   .glass {
     @apply bg-background/80 backdrop-blur-xl border border-border/50;
   }
-  
+
   /* Smooth animations */
   .animate-in {
     animation: slideIn 0.2s ease-out;
   }
-  
+
   .animate-out {
     animation: slideOut 0.2s ease-in;
   }
-  
+
   /* Text gradients */
   .text-gradient {
     @apply bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent;
   }
-  
+
   /* Smooth shadows */
   .shadow-smooth {
-    box-shadow: 
-      0 1px 2px 0 rgb(0 0 0 / 0.02),
-      0 2px 8px 0 rgb(0 0 0 / 0.04);
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.02), 0 2px 8px 0 rgb(0 0 0 / 0.04);
   }
-  
+
   .shadow-smooth-lg {
-    box-shadow:
-      0 4px 6px -1px rgb(0 0 0 / 0.05),
-      0 10px 20px -5px rgb(0 0 0 / 0.08);
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 10px 20px -5px
+      rgb(0 0 0 / 0.08);
   }
 }
 

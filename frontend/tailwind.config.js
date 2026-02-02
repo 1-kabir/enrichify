@@ -93,8 +93,9 @@ module.exports = {
         "slide-in": "slide-in 0.3s ease-out",
       },
       boxShadow: {
-        'smooth': '0 1px 2px 0 rgb(0 0 0 / 0.02), 0 2px 8px 0 rgb(0 0 0 / 0.04)',
-        'smooth-lg': '0 4px 6px -1px rgb(0 0 0 / 0.05), 0 10px 20px -5px rgb(0 0 0 / 0.08)',
+        smooth: "0 1px 2px 0 rgb(0 0 0 / 0.02), 0 2px 8px 0 rgb(0 0 0 / 0.04)",
+        "smooth-lg":
+          "0 4px 6px -1px rgb(0 0 0 / 0.05), 0 10px 20px -5px rgb(0 0 0 / 0.08)",
       },
     },
   },

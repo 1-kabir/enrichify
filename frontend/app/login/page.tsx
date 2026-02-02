@@ -51,11 +51,14 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
       {/* Gradient background */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-primary/10" />
-      
+
       {/* Animated orbs */}
       <div className="absolute top-20 left-20 w-72 h-72 bg-primary/20 rounded-full blur-3xl animate-pulse" />
-      <div className="absolute bottom-20 right-20 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-      
+      <div
+        className="absolute bottom-20 right-20 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse"
+        style={{ animationDelay: "1s" }}
+      />
+
       <div className="relative z-10 w-full max-w-md animate-fade-in">
         <Card className="border-border/50 shadow-smooth-lg backdrop-blur-sm bg-card/95">
           <CardHeader className="space-y-4 text-center pb-8">
@@ -112,9 +115,9 @@ export default function LoginPage() {
               </div>
             </CardContent>
             <CardFooter className="flex flex-col space-y-4 pt-2">
-              <Button 
-                type="submit" 
-                className="w-full h-11 font-medium group transition-all hover:shadow-smooth" 
+              <Button
+                type="submit"
+                className="w-full h-11 font-medium group transition-all hover:shadow-smooth"
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -132,16 +135,18 @@ export default function LoginPage() {
                 <div className="flex-1 border-t border-border" />
               </div>
               <p className="text-xs text-center text-muted-foreground px-4">
-                New users must be created by administrators with appropriate permissions
+                New users must be created by administrators with appropriate
+                permissions
               </p>
             </CardFooter>
           </form>
         </Card>
-        
+
         {/* Footer branding */}
         <div className="mt-8 text-center">
           <p className="text-sm text-muted-foreground">
-            Powered by <span className="font-semibold text-gradient">Enrichify</span>
+            Powered by{" "}
+            <span className="font-semibold text-gradient">Enrichify</span>
           </p>
         </div>
       </div>

@@ -2,8 +2,21 @@
 
 import { ProtectedRoute } from "@/components/protected-route";
 import { AppLayout } from "@/components/layout/app-layout";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Users, Database, TrendingUp, Activity, Sparkles, Zap } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import {
+  Users,
+  Database,
+  TrendingUp,
+  Activity,
+  Sparkles,
+  Zap,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const stats = [
@@ -73,22 +86,28 @@ export default function DashboardPage() {
             {stats.map((stat, index) => {
               const Icon = stat.icon;
               return (
-                <Card 
-                  key={stat.title} 
+                <Card
+                  key={stat.title}
                   className="relative overflow-hidden border-border/50 shadow-smooth hover:shadow-smooth-lg transition-all duration-300 hover:-translate-y-1"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
-                  <div className={`absolute inset-0 bg-gradient-to-br ${stat.gradient} opacity-50`} />
+                  <div
+                    className={`absolute inset-0 bg-gradient-to-br ${stat.gradient} opacity-50`}
+                  />
                   <CardHeader className="relative flex flex-row items-center justify-between space-y-0 pb-3">
                     <CardTitle className="text-sm font-medium text-muted-foreground">
                       {stat.title}
                     </CardTitle>
-                    <div className={`rounded-lg bg-background/80 backdrop-blur-sm p-2`}>
+                    <div
+                      className="rounded-lg bg-background/80 backdrop-blur-sm p-2"
+                    >
                       <Icon className={`h-4 w-4 ${stat.iconColor}`} />
                     </div>
                   </CardHeader>
                   <CardContent className="relative">
-                    <div className="text-3xl font-heading font-bold">{stat.value}</div>
+                    <div className="text-3xl font-heading font-bold">
+                      {stat.value}
+                    </div>
                     <p className="text-xs text-muted-foreground mt-1">
                       {stat.description}
                     </p>
@@ -107,7 +126,9 @@ export default function DashboardPage() {
                     <Sparkles className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <CardTitle className="text-xl font-heading">Getting Started</CardTitle>
+                    <CardTitle className="text-xl font-heading">
+                      Getting Started
+                    </CardTitle>
                     <CardDescription className="mt-1">
                       Begin your data enrichment journey
                     </CardDescription>
@@ -121,7 +142,9 @@ export default function DashboardPage() {
                       <div className="h-1.5 w-1.5 rounded-full bg-primary" />
                     </div>
                     <div className="flex-1">
-                      <p className="text-sm font-medium">Create your first webset</p>
+                      <p className="text-sm font-medium">
+                        Create your first webset
+                      </p>
                       <p className="text-xs text-muted-foreground mt-0.5">
                         Upload contacts or connect a data source to get started
                       </p>
@@ -164,7 +187,9 @@ export default function DashboardPage() {
                     <Zap className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <CardTitle className="text-xl font-heading">Quick Tips</CardTitle>
+                    <CardTitle className="text-xl font-heading">
+                      Quick Tips
+                    </CardTitle>
                     <CardDescription className="mt-1">
                       Pro tips to get the most out of Enrichify
                     </CardDescription>
@@ -175,13 +200,17 @@ export default function DashboardPage() {
                 <div className="rounded-lg bg-background/50 backdrop-blur-sm border border-border/50 p-4 space-y-2">
                   <p className="text-sm font-medium">💡 Use specific prompts</p>
                   <p className="text-xs text-muted-foreground">
-                    The more specific your enrichment prompts, the better results you'll get
+                    The more specific your enrichment prompts, the better
+                    results you'll get
                   </p>
                 </div>
                 <div className="rounded-lg bg-background/50 backdrop-blur-sm border border-border/50 p-4 space-y-2">
-                  <p className="text-sm font-medium">🎯 Try multiple providers</p>
+                  <p className="text-sm font-medium">
+                    🎯 Try multiple providers
+                  </p>
                   <p className="text-xs text-muted-foreground">
-                    Different providers excel at different tasks - experiment to find the best fit
+                    Different providers excel at different tasks - experiment to
+                    find the best fit
                   </p>
                 </div>
                 <div className="rounded-lg bg-background/50 backdrop-blur-sm border border-border/50 p-4 space-y-2">
@@ -197,8 +226,12 @@ export default function DashboardPage() {
           {/* Recent Activity - Placeholder for future */}
           <Card className="border-border/50 shadow-smooth">
             <CardHeader>
-              <CardTitle className="text-xl font-heading">Recent Activity</CardTitle>
-              <CardDescription>Your latest enrichment jobs and updates</CardDescription>
+              <CardTitle className="text-xl font-heading">
+                Recent Activity
+              </CardTitle>
+              <CardDescription>
+                Your latest enrichment jobs and updates
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex flex-col items-center justify-center py-12 text-center">
@@ -206,7 +239,8 @@ export default function DashboardPage() {
                   <Activity className="h-8 w-8 text-muted-foreground" />
                 </div>
                 <p className="text-sm text-muted-foreground max-w-sm">
-                  No recent activity yet. Start enriching your data to see updates here.
+                  No recent activity yet. Start enriching your data to see
+                  updates here.
                 </p>
               </div>
             </CardContent>

@@ -85,9 +85,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         <Header />
 
         <main className="flex-1 overflow-y-auto bg-gradient-to-br from-background via-background to-primary/5 p-4 md:p-6 lg:p-8">
-          <div className="mx-auto max-w-7xl">
-            {children}
-          </div>
+          <div className="mx-auto max-w-7xl">{children}</div>
         </main>
       </div>
     </div>
