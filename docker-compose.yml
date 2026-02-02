@@ -11,6 +11,8 @@ services:
       - .env
     environment:
       - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:3001}
+      - HOSTNAME=0.0.0.0
+      - PORT=3000
     restart: unless-stopped
 
   backend:
