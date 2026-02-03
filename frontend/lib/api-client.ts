@@ -1,13 +1,9 @@
 import axios, { type AxiosInstance, type AxiosError } from "axios";
 
-// In production (accessed via nginx), use /api path which proxies to backend
+// In production (accessed via nginx), connect directly to backend at :3001
 // In development, connect directly to backend at :3001
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL ||
-  (typeof window !== "undefined" &&
-  window.location.origin.includes("kabirstudios.com")
-    ? "/api"
-    : "http://localhost:3001");
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 class ApiClient {
   private client: AxiosInstance;

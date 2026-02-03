@@ -36,9 +36,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const login = async (email: string, password: string) => {
-    const response = await api.post("/auth/login", { email, password });
-    const { token, user: userData } = response.data;
-    apiClient.setAuthToken(token);
+    const response = await api.post("/auth/login", { username: email, password });
+    const { accessToken, user: userData } = response.data;
+    apiClient.setAuthToken(accessToken);
     setUser(userData);
     router.push("/dashboard");
   };

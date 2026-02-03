@@ -3,14 +3,16 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:${BACKEND_PORT:-3001}}
     ports:
-      - "8080:3000"
+      - "${FRONTEND_PORT:-8080}:3000"
     depends_on:
       - backend
     env_file:
       - .env
     environment:
-      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:3001}
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:${BACKEND_PORT:-3001}}
       - HOSTNAME=0.0.0.0
       - PORT=3000
     restart: unless-stopped
@@ -20,7 +22,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     ports:
-      - "3001:3001"
+      - "${BACKEND_PORT:-3001}:3001"
     depends_on:
       - postgres
       - redis

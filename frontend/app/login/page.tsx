@@ -83,12 +83,12 @@ export default function LoginPage() {
             <CardContent className="space-y-5">
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-sm font-medium">
-                  Email address
+                  Username
                 </Label>
                 <Input
                   id="email"
-                  type="email"
-                  placeholder="name@company.com"
+                  type="text"
+                  placeholder="admin"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
