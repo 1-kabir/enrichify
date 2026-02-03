@@ -64,7 +64,14 @@ config.yml
 # Docker (except Dockerfiles)
 .dockerignore
 
+# Testing
+test-results/
+playwright-report/
+playwright/.cache/
+tests/screenshots/
+
 # Package manager lock files (keep committed for reproducibility)
 # package-lock.json
 # yarn.lock
-# pnpm-lock.yaml.github/copilot-instructions.md
+# pnpm-lock.yaml
+.github/copilot-instructions.md

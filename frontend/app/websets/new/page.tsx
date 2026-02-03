@@ -2,10 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import type {
-	CreateWebsetDto,
-	ColumnDefinition,
-} from "@/types/webset";
+import type { CreateWebsetDto, ColumnDefinition } from "@/types/webset";
 import { WebsetStatus } from "@/types/webset";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

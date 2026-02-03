@@ -44,8 +44,8 @@ export default function RegisterPage() {
           </div>
         </CardContent>
         <CardFooter className="flex flex-col space-y-4">
-          <Button 
-            onClick={() => router.push("/login")} 
+          <Button
+            onClick={() => router.push("/login")}
             className="w-full"
             variant="default"
           >
