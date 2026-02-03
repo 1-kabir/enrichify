@@ -16,6 +16,7 @@ import type {
     EnrichCellDto,
     WebsetVersion,
 } from "@/types/webset";
+import { WebsetStatus, LLMProviderType, SearchProviderType } from "@/types/webset";
 import { WebsetTable } from "@/components/websets/webset-table";
 import { WebsetToolbar } from "@/components/websets/webset-toolbar";
 import { WebsetSidebar } from "@/components/websets/webset-sidebar";
@@ -43,7 +44,7 @@ const mockWebset: Webset = {
         { id: "email", name: "Email", type: "email" },
         { id: "linkedin", name: "LinkedIn", type: "url" },
     ],
-    status: "active" as "active" | "inactive" | "draft",
+    status: WebsetStatus.ACTIVE,
     currentVersion: 3,
     rowCount: 10,
     createdAt: "2024-01-15T10:00:00Z",
@@ -96,13 +97,13 @@ const mockLLMProviders: LLMProvider[] = [
     {
         id: "llm-1",
         name: "GPT-4",
-        type: "openai" as "openai" | "claude" | "gemini" | "groq" | "openrouter" | "vercel-ai" | "mistral",
+        type: LLMProviderType.OPENAI,
         isActive: true,
     },
     {
         id: "llm-2",
         name: "Claude 3",
-        type: "claude" as "openai" | "claude" | "gemini" | "groq" | "openrouter" | "vercel-ai" | "mistral",
+        type: LLMProviderType.CLAUDE,
         isActive: true,
     },
 ];
@@ -111,13 +112,13 @@ const mockSearchProviders: SearchProvider[] = [
     {
         id: "search-1",
         name: "Exa",
-        type: "exa" as "exa" | "brave" | "bing" | "google" | "firecrawl" | "tavily" | "serper" | "jina" | "searxng",
+        type: SearchProviderType.EXA,
         isActive: true,
     },
     {
         id: "search-2",
         name: "Brave Search",
-        type: "brave" as "exa" | "brave" | "bing" | "google" | "firecrawl" | "tavily" | "serper" | "jina" | "searxng",
+        type: SearchProviderType.BRAVE,
         isActive: true,
     },
 ];
@@ -184,8 +185,17 @@ export default function WebsetPage() {
 
         fetchWebsetData();
 
-        // Socket.io integration
-        const socket = io(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/enrichment`, {
+        // Socket.io integration - use dynamic URL
+        const getSocketUrl = () => {
+            // If on localhost, use explicit backend port
+            if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+                return `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3132"}/enrichment`;
+            }
+            // For production/domain - use same origin
+            return `${window.location.origin}/enrichment`;
+        };
+        
+        const socket = io(getSocketUrl(), {
             auth: { token: localStorage.getItem("auth_token") }
         });
 

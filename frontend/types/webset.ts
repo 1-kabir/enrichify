@@ -67,6 +67,7 @@ export enum LLMProviderType {
   GROQ = "groq",
   OPENROUTER = "openrouter",
   VERCEL_AI = "vercel-ai",
+  MISTRAL = "mistral",
 }
 
 export enum SearchProviderType {

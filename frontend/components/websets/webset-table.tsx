@@ -67,7 +67,7 @@ export function WebsetTable({
       for (const col of columns) {
         const cell = cellMap.get(`${i}-${col.id}`);
         row[col.id] = cell;
-      });
+      }
       return row;
     });
   }, [rowCount, columns, cellMap]);

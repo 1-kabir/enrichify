@@ -1,16 +1,29 @@
 import axios, { type AxiosInstance, type AxiosError } from "axios";
 
-// In production (accessed via nginx), connect directly to backend at :3001
-// In development, connect directly to backend at :3001
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+// Dynamic API base URL:
+// - In browser: uses current origin (works with reverse proxy/domain)
+// - In SSR/build: uses env var or localhost fallback
+// - For local dev: explicitly set NEXT_PUBLIC_API_URL=http://localhost:3132
+function getApiBaseUrl(): string {
+  // If running in browser (client-side)
+  if (typeof window !== "undefined") {
+    // Check if we're on localhost - use explicit backend port
+    if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+      return process.env.NEXT_PUBLIC_API_URL || "http://localhost:3132";
+    }
+    // For production/domain - use same origin (nginx will proxy)
+    return window.location.origin;
+  }
+  // Server-side: use env var or default
+  return process.env.NEXT_PUBLIC_API_URL || "http://localhost:3132";
+}
 
 class ApiClient {
   private client: AxiosInstance;
 
   constructor() {
     this.client = axios.create({
-      baseURL: API_BASE_URL,
+      baseURL: getApiBaseUrl(),
       headers: {
         "Content-Type": "application/json",
       },
