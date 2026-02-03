@@ -96,7 +96,7 @@ export function ExportDialog({
             <Label htmlFor="format">Export Format</Label>
             <Select
               value={format}
-              onValueChange={(value: any) => setFormat(value)}
+              onValueChange={(value: ExportFormat) => setFormat(value)}
               disabled={isExporting}
             >
               <SelectTrigger>

@@ -43,7 +43,7 @@ const mockWebset: Webset = {
         { id: "email", name: "Email", type: "email" },
         { id: "linkedin", name: "LinkedIn", type: "url" },
     ],
-    status: "active" as any,
+    status: "active" as "active" | "inactive" | "draft",
     currentVersion: 3,
     rowCount: 10,
     createdAt: "2024-01-15T10:00:00Z",
@@ -96,13 +96,13 @@ const mockLLMProviders: LLMProvider[] = [
     {
         id: "llm-1",
         name: "GPT-4",
-        type: "openai" as any,
+        type: "openai" as "openai" | "claude" | "gemini" | "groq" | "openrouter" | "vercel-ai" | "mistral",
         isActive: true,
     },
     {
         id: "llm-2",
         name: "Claude 3",
-        type: "claude" as any,
+        type: "claude" as "openai" | "claude" | "gemini" | "groq" | "openrouter" | "vercel-ai" | "mistral",
         isActive: true,
     },
 ];
@@ -111,13 +111,13 @@ const mockSearchProviders: SearchProvider[] = [
     {
         id: "search-1",
         name: "Exa",
-        type: "exa" as any,
+        type: "exa" as "exa" | "brave" | "bing" | "google" | "firecrawl" | "tavily" | "serper" | "jina" | "searxng",
         isActive: true,
     },
     {
         id: "search-2",
         name: "Brave Search",
-        type: "brave" as any,
+        type: "brave" as "exa" | "brave" | "bing" | "google" | "firecrawl" | "tavily" | "serper" | "jina" | "searxng",
         isActive: true,
     },
 ];
@@ -172,7 +172,7 @@ export default function WebsetPage() {
                     setCells(cellsRes.data);
                     setLlmProviders(llmRes.data);
                     setSearchProviders(searchRes.data);
-                    setVisibleColumns(websetRes.data.columnDefinitions.map((c: any) => c.id));
+                    setVisibleColumns(websetRes.data.columnDefinitions.map((c: ColumnDefinition) => c.id));
                     setEditedName(websetRes.data.name);
                 }
             } catch (error) {
@@ -317,7 +317,7 @@ export default function WebsetPage() {
 
     const handleEnrich = async (dto: EnrichCellDto) => {
         try {
-            const response = await api.post(`/enrichment`, dto);
+            const response = await api.post("/enrichment", dto);
             const newJob: EnrichmentJob = {
                 id: response.data.id || crypto.randomUUID(),
                 websetId: dto.websetId,

@@ -54,17 +54,17 @@ export function WebsetTable({
   // Create a map of cells by row and column for quick lookup
   const cellMap = useMemo(() => {
     const map = new Map<string, WebsetCellType>();
-    cells.forEach((cell) => {
+    for (const cell of cells) {
       map.set(`${cell.row}-${cell.column}`, cell);
-    });
+    }
     return map;
   }, [cells]);
 
   // Generate row data
   const data = useMemo(() => {
     return Array.from({ length: rowCount }, (_, i) => {
-      const row: any = { _rowId: i };
-      columns.forEach((col) => {
+      const row: Record<string, any> = { _rowId: i };
+      for (const col of columns) {
         const cell = cellMap.get(`${i}-${col.id}`);
         row[col.id] = cell;
       });
@@ -73,8 +73,8 @@ export function WebsetTable({
   }, [rowCount, columns, cellMap]);
 
   // Create table columns
-  const tableColumns = useMemo<ColumnDef<any>[]>(() => {
-    const cols: ColumnDef<any>[] = [
+  const tableColumns = useMemo<ColumnDef<Record<string, any>>[]>(() => {
+    const cols: ColumnDef<Record<string, any>>[] = [
       {
         id: "select",
         header: ({ table }) => (
@@ -110,7 +110,7 @@ export function WebsetTable({
       },
     ];
 
-    columns.forEach((col) => {
+    for (const col of columns) {
       if (visibleColumns.includes(col.id)) {
         cols.push({
           id: col.id,
@@ -158,7 +158,7 @@ export function WebsetTable({
           minSize: 200,
         });
       }
-    });
+    }
 
     return cols;
   }, [columns, visibleColumns, editingCell]);
@@ -177,7 +177,7 @@ export function WebsetTable({
           typeof updater === "function" ? updater(rowSelection) : updater;
         const selectedRows = Object.keys(newSelection)
           .filter((key) => newSelection[key])
-          .map((key) => parseInt(key));
+          .map((key) => Number.parseInt(key));
         onRowSelect(selectedRows);
       }
     },

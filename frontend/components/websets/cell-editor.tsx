@@ -67,7 +67,7 @@ export function CellEditor({ cell, isOpen, onClose, onSave }: CellEditorProps) {
                 max="1"
                 step="0.01"
                 value={confidenceScore}
-                onChange={(e) => setConfidenceScore(parseFloat(e.target.value))}
+                onChange={(e) => setConfidenceScore(Number.parseFloat(e.target.value))}
                 className="w-full"
               />
             </div>

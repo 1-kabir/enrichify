@@ -8,7 +8,6 @@ import {
   ConnectedSocket,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { UseGuards } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { LLMProvidersService, LLMRequest } from '../providers/llm/llm-providers.service';
 import { MessageRole } from '../entities/chat-message.entity';
@@ -115,7 +114,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('sendMessage')
   async handleSendMessage(
     @MessageBody() data: { conversationId: string; content: string; userId: string },
-    @ConnectedSocket() client: AuthenticatedSocket,
+    @ConnectedSocket() _client: AuthenticatedSocket,
   ) {
     try {
       const conversation = await this.chatService.findConversation(
@@ -209,7 +208,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('streamMessage')
   async handleStreamMessage(
     @MessageBody() data: { conversationId: string; content: string; userId: string },
-    @ConnectedSocket() client: AuthenticatedSocket,
+    @ConnectedSocket() _client: AuthenticatedSocket,
   ) {
     try {
       const conversation = await this.chatService.findConversation(

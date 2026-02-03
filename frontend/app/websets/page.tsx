@@ -225,15 +225,16 @@ export default function WebsetsPage() {
               <Card className="hover:shadow-lg transition-shadow cursor-pointer group">
                 <CardHeader className="space-y-3">
                   <div className="flex items-start justify-between">
-                    <div
-                      className="flex-1 min-w-0"
+                    <button
+                      className="flex-1 min-w-0 text-left bg-transparent border-none p-0 cursor-pointer"
                       onClick={() => router.push(`/websets/${webset.id}`)}
+                      type="button"
                     >
                       <CardTitle className="truncate">{webset.name}</CardTitle>
                       <CardDescription className="line-clamp-2 mt-1.5">
                         {webset.description || "No description"}
                       </CardDescription>
-                    </div>
+                    </button>
                     <DropdownMenu>
                       <DropdownMenuTrigger
                         asChild

@@ -1,8 +1,13 @@
 module.exports = {
+  env: {
+    node: true,
+    es2021: true,
+  },
   parser: '@typescript-eslint/parser',
   parserOptions: {
-    project: 'tsconfig.json',
+    project: './tsconfig.json',
     tsconfigRootDir: __dirname,
+    ecmaVersion: 12,
     sourceType: 'module',
   },
   plugins: [
@@ -12,17 +17,7 @@ module.exports = {
     'eslint:recommended',
     '@typescript-eslint/recommended',
   ],
-  root: true,
-  env: {
-    node: true,
-    jest: true,
-  },
-  ignorePatterns: ['.eslintrc.js'],
   rules: {
-    '@typescript-eslint/interface-name-prefix': 'off',
-    '@typescript-eslint/explicit-function-return-type': 'off',
-    '@typescript-eslint/explicit-module-boundary-types': 'off',
-    '@typescript-eslint/no-explicit-any': 'off',
-    '@typescript-eslint/no-unused-vars': 'warn', // Changed from error to warning for development
+    '@typescript-eslint/no-unused-vars': 'off',
   },
 };

@@ -105,7 +105,7 @@ export function WebsetCellComponent({
             {confidenceScore !== undefined && (
               <p>Confidence: {(confidenceScore * 100).toFixed(0)}%</p>
             )}
-            {hasCitations && <p>{cell.citations!.length} citation(s)</p>}
+            {hasCitations && <p>{cell.citations?.length ?? 0} citation(s)</p>}
             {cell?.updatedAt && (
               <p className="text-muted-foreground">
                 Updated: {new Date(cell.updatedAt).toLocaleDateString()}

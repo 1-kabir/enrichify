@@ -23,7 +23,7 @@ export class AuthController {
 
   @Post('register')
   async register(
-    @Body(ValidationPipe) registerDto: RegisterDto,
+    @Body(ValidationPipe) _registerDto: RegisterDto,
   ): Promise<UserResponseDto> {
     // Public registration disabled - users must be created by admins
     throw new HttpException(
