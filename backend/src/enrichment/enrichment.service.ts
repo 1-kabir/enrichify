@@ -6,6 +6,7 @@ import { Queue } from 'bullmq';
 import { Webset } from '../entities/webset.entity';
 import { WebsetCell } from '../entities/webset-cell.entity';
 import { EnrichCellDto } from './dto/enrich-cell.dto';
+import { JobPartitionerService } from './job-partitioner.service';
 
 @Injectable()
 export class EnrichmentService {
@@ -16,6 +17,7 @@ export class EnrichmentService {
     private cellRepository: Repository<WebsetCell>,
     @InjectQueue('enrichment')
     private enrichmentQueue: Queue,
+    private jobPartitionerService: JobPartitionerService,
   ) {}
 
   async enrichCells(enrichCellDto: EnrichCellDto, userId: string): Promise<{ jobId: string }> {
@@ -41,12 +43,11 @@ export class EnrichmentService {
       );
     }
 
-    const job = await this.enrichmentQueue.add('enrich-cells', {
-      ...enrichCellDto,
-      userId,
-    });
+    // Use the JobPartitioner to split large jobs across multiple agents
+    const partitionConfig = this.jobPartitionerService.determineOptimalPartitioning(enrichCellDto.rows.length);
+    const result = await this.jobPartitionerService.partitionJob(enrichCellDto, userId, partitionConfig);
 
-    return { jobId: job.id };
+    return result;
   }
 
   async getJobStatus(jobId: string): Promise<any> {

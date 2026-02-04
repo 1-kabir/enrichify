@@ -31,9 +31,207 @@ export class EnrichmentProcessor extends WorkerHost {
     }
 
     async process(job: Job): Promise<any> {
-        this.logger.log(`Processing enrichment job ${job.id}`);
+        switch (job.name) {
+            case 'enrich-cells-parent':
+                return this.processParentJob(job);
+            case 'enrich-cells-batch-parent':
+                return this.processBatchParentJob(job);
+            case 'enrich-cell-single':
+                return this.processSingleRowJob(job);
+            case 'enrich-cell-chunk':
+                return this.processChunkJob(job);
+            case 'agent-work':
+                return this.processAgentWorkJob(job);
+            default:
+                throw new Error(`Unknown job type: ${job.name}`);
+        }
+    }
 
-        const { websetId, column, rows, prompt, llmProviderId, searchProviderId, userId } = job.data;
+    private async processParentJob(job: Job): Promise<any> {
+        const { websetId, totalRows } = job.data;
+
+        this.logger.log(`Processing parent enrichment job ${job.id} for ${totalRows} rows`);
+
+        // Wait for all child jobs to complete
+        const children = await job.getChildren();
+
+        // Monitor progress of child jobs
+        let completedCount = 0;
+        const progressInterval = setInterval(async () => {
+            const completedChildren = children.filter(child => child.isCompleted());
+            const currentProgress = Math.floor((completedChildren.length / totalRows) * 100);
+
+            if (currentProgress > job.progress) {
+                await job.updateProgress(currentProgress);
+
+                this.enrichmentGateway.sendProgress(websetId, {
+                    jobId: job.id,
+                    progress: currentProgress,
+                    completedCount: completedChildren.length,
+                    totalRows,
+                    status: 'running',
+                });
+            }
+
+            if (completedChildren.length >= totalRows) {
+                clearInterval(progressInterval);
+
+                this.enrichmentGateway.sendProgress(websetId, {
+                    jobId: job.id,
+                    progress: 100,
+                    completedCount: totalRows,
+                    totalRows,
+                    status: 'completed',
+                });
+            }
+        }, 1000); // Update progress every second
+
+        // Wait for all children to complete
+        await job.waitUntilFinished();
+
+        clearInterval(progressInterval);
+
+        return { enrichedRows: totalRows, totalRows };
+    }
+
+    private async processBatchParentJob(job: Job): Promise<any> {
+        const { websetId, totalRows, chunkCount } = job.data;
+
+        this.logger.log(`Processing batch parent enrichment job ${job.id} for ${totalRows} rows in ${chunkCount} chunks`);
+
+        // Monitor progress of child jobs
+        const progressInterval = setInterval(async () => {
+            const children = await job.getChildren();
+            const completedChildren = children.filter(child => child.isCompleted());
+            const currentProgress = Math.floor((completedChildren.length / chunkCount) * 100);
+
+            if (currentProgress > job.progress) {
+                await job.updateProgress(currentProgress);
+
+                this.enrichmentGateway.sendProgress(websetId, {
+                    jobId: job.id,
+                    progress: currentProgress,
+                    completedCount: completedChildren.length * (totalRows / chunkCount), // Approximate
+                    totalRows,
+                    status: 'running',
+                });
+            }
+
+            if (completedChildren.length >= chunkCount) {
+                clearInterval(progressInterval);
+
+                this.enrichmentGateway.sendProgress(websetId, {
+                    jobId: job.id,
+                    progress: 100,
+                    completedCount: totalRows,
+                    totalRows,
+                    status: 'completed',
+                });
+            }
+        }, 1000); // Update progress every second
+
+        // Wait for all children to complete
+        await job.waitUntilFinished();
+
+        clearInterval(progressInterval);
+
+        return { enrichedRows: totalRows, totalRows, chunksProcessed: chunkCount };
+    }
+
+    private async processSingleRowJob(job: Job): Promise<any> {
+        const {
+            websetId,
+            row,
+            column,
+            prompt,
+            llmProviderId,
+            searchProviderId,
+            userId,
+            parentJobId
+        } = job.data;
+
+        const webset = await this.websetRepository.findOne({
+            where: { id: websetId },
+        });
+
+        if (!webset) {
+            throw new Error(`Webset with ID ${websetId} not found`);
+        }
+
+        try {
+            const result = await this.enrichCellWithSwarm(
+                webset,
+                row,
+                column,
+                prompt,
+                llmProviderId,
+                searchProviderId,
+                userId,
+            );
+
+            // Save or update cell
+            let cell = await this.cellRepository.findOne({
+                where: { websetId, row, column },
+            });
+
+            if (!cell) {
+                cell = this.cellRepository.create({
+                    websetId,
+                    row,
+                    column,
+                });
+            }
+
+            cell.value = result.value;
+            cell.confidenceScore = result.confidenceScore;
+            cell.metadata = {
+                ...cell.metadata,
+                enrichedAt: new Date().toISOString(),
+                llmProviderId,
+                searchProviderId,
+                originalPrompt: prompt,
+            };
+
+            const savedCell = await this.cellRepository.save(cell);
+
+            // Emit real-time update
+            this.enrichmentGateway.sendCellUpdate(websetId, savedCell);
+
+            // Save citations
+            if (result.citations && result.citations.length > 0) {
+                // Clear old citations for this cell
+                await this.citationRepository.delete({ cellId: savedCell.id });
+
+                const citations = result.citations.map(c => this.citationRepository.create({
+                    cellId: savedCell.id,
+                    url: c.url,
+                    title: c.title,
+                    contentSnippet: c.snippet,
+                    searchProviderId,
+                }));
+                await this.citationRepository.save(citations);
+            }
+
+            return { success: true, cellId: savedCell.id };
+        } catch (error) {
+            this.logger.error(`Error enriching row ${row}: ${error.message}`);
+            throw error;
+        }
+    }
+
+    private async processChunkJob(job: Job): Promise<any> {
+        const {
+            websetId,
+            rows,
+            column,
+            prompt,
+            llmProviderId,
+            searchProviderId,
+            userId,
+            parentJobId,
+            chunkIndex,
+            totalChunks
+        } = job.data;
 
         const webset = await this.websetRepository.findOne({
             where: { id: websetId },
@@ -102,29 +300,119 @@ export class EnrichmentProcessor extends WorkerHost {
                 }
 
                 completedCount++;
+
+                // Update job progress
                 const progress = (completedCount / totalRows) * 100;
                 await job.updateProgress(progress);
-                this.enrichmentGateway.sendProgress(websetId, {
-                    jobId: job.id,
-                    progress,
-                    completedCount,
-                    totalRows,
-                    status: 'running',
-                });
             } catch (error) {
-                this.logger.error(`Error enriching row ${rowIdx}: ${error.message}`);
+                this.logger.error(`Error enriching row ${rowIdx} in chunk ${chunkIndex}: ${error.message}`);
             }
         }
 
-        this.enrichmentGateway.sendProgress(websetId, {
-            jobId: job.id,
-            progress: 100,
-            completedCount,
-            totalRows,
-            status: 'completed',
+        return {
+            success: true,
+            chunkIndex,
+            totalChunks,
+            enrichedRows: completedCount,
+            totalRows
+        };
+    }
+
+    private async processAgentWorkJob(job: Job): Promise<any> {
+        const {
+            agentId,
+            websetId,
+            rows,
+            column,
+            prompt,
+            llmProviderId,
+            searchProviderId,
+            userId,
+        } = job.data;
+
+        this.logger.log(`Agent ${agentId} processing ${rows.length} rows for webset ${websetId}`);
+
+        const webset = await this.websetRepository.findOne({
+            where: { id: websetId },
         });
 
-        return { enrichedRows: completedCount, totalRows };
+        if (!webset) {
+            throw new Error(`Webset with ID ${websetId} not found`);
+        }
+
+        const totalRows = rows.length;
+        let completedCount = 0;
+
+        for (const rowIdx of rows) {
+            try {
+                const result = await this.enrichCellWithSwarm(
+                    webset,
+                    rowIdx,
+                    column,
+                    prompt,
+                    llmProviderId,
+                    searchProviderId,
+                    userId,
+                );
+
+                // Save or update cell
+                let cell = await this.cellRepository.findOne({
+                    where: { websetId, row: rowIdx, column },
+                });
+
+                if (!cell) {
+                    cell = this.cellRepository.create({
+                        websetId,
+                        row: rowIdx,
+                        column,
+                    });
+                }
+
+                cell.value = result.value;
+                cell.confidenceScore = result.confidenceScore;
+                cell.metadata = {
+                    ...cell.metadata,
+                    enrichedAt: new Date().toISOString(),
+                    llmProviderId,
+                    searchProviderId,
+                    originalPrompt: prompt,
+                    agentId,
+                };
+
+                const savedCell = await this.cellRepository.save(cell);
+
+                // Emit real-time update
+                this.enrichmentGateway.sendCellUpdate(websetId, savedCell);
+
+                // Save citations
+                if (result.citations && result.citations.length > 0) {
+                    // Clear old citations for this cell
+                    await this.citationRepository.delete({ cellId: savedCell.id });
+
+                    const citations = result.citations.map(c => this.citationRepository.create({
+                        cellId: savedCell.id,
+                        url: c.url,
+                        title: c.title,
+                        contentSnippet: c.snippet,
+                        searchProviderId,
+                    }));
+                    await this.citationRepository.save(citations);
+                }
+
+                completedCount++;
+            } catch (error) {
+                this.logger.error(`Error enriching row ${rowIdx} with agent ${agentId}: ${error.message}`);
+            }
+        }
+
+        this.logger.log(`Agent ${agentId} completed ${completedCount}/${totalRows} rows for webset ${websetId}`);
+
+        return {
+            success: true,
+            agentId,
+            enrichedRows: completedCount,
+            totalRows
+        };
     }
 
     private async enrichCellWithSwarm(

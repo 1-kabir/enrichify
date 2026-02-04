@@ -30,6 +30,10 @@ import { ChatModule } from './chat/chat.module';
       connection: {
         host: process.env.REDIS_HOST || 'localhost',
         port: parseInt(process.env.REDIS_PORT, 10) || 6379,
+        retryDelayOnFailover: 1000,
+        maxLoadingAttempts: 3,
+        connectTimeout: 60000,
+        disconnectTimeout: 60000,
       },
     }),
     AuthModule,
