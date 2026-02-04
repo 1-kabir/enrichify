@@ -5,6 +5,7 @@ import { EnrichmentService } from './enrichment.service';
 import { EnrichmentController } from './enrichment.controller';
 import { EnrichmentProcessor } from './enrichment.processor';
 import { EnrichmentGateway } from './enrichment.gateway';
+import { PlanningService } from './planning.service';
 import { ProvidersModule } from '../providers/providers.module';
 import { Webset } from '../entities/webset.entity';
 import { WebsetCell } from '../entities/webset-cell.entity';
@@ -19,7 +20,7 @@ import { WebsetCitation } from '../entities/webset-citation.entity';
         ProvidersModule,
     ],
     controllers: [EnrichmentController],
-    providers: [EnrichmentService, EnrichmentProcessor, EnrichmentGateway],
-    exports: [EnrichmentService, EnrichmentGateway],
+    providers: [EnrichmentService, EnrichmentProcessor, EnrichmentGateway, PlanningService],
+    exports: [EnrichmentService, EnrichmentGateway, PlanningService],
 })
 export class EnrichmentModule { }
