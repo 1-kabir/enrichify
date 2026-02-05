@@ -31,12 +31,18 @@ export class EnrichmentGateway implements OnGatewayConnection, OnGatewayDisconne
         this.logger.log(`Client disconnected: ${client.id}`);
     }
 
+    @SubscribeMessage('join-room')
+    handleJoinRoom(@MessageBody() room: string, @ConnectedSocket() client: Socket) {
+        client.join(room);
+        this.logger.log(`Client ${client.id} joined room: ${room}`);
+    }
+
     sendProgress(websetId: string, data: any) {
-        this.server.emit(`progress:${websetId}`, data);
+        this.server.to(`webset:${websetId}`).emit(`progress:${websetId}`, data);
     }
 
     sendCellUpdate(websetId: string, cell: any) {
-        this.server.emit(`cell:updated:${websetId}`, cell);
+        this.server.to(`webset:${websetId}`).emit(`cell:updated:${websetId}`, cell);
     }
 
     broadcastMetrics(metrics: SwarmMetrics) {

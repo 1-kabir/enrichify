@@ -126,6 +126,11 @@ export default function WebsetPage() {
             auth: { token: localStorage.getItem("auth_token") }
         });
 
+        // Join the webset room
+        socket.on('connect', () => {
+            socket.emit('join-room', `webset:${websetId}`);
+        });
+
         socket.on(`progress:${websetId}`, (data) => {
             setEnrichmentJobs(prev => {
                 const existing = prev.find(j => j.id === data.jobId);
