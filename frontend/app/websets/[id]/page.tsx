@@ -468,7 +468,13 @@ export default function WebsetPage() {
                                         className="space-y-4"
                                     >
                                         {enrichmentJobs.length > 0 && (
-                                            <EnrichmentProgress jobs={enrichmentJobs} />
+                                            <EnrichmentProgress 
+                                                jobs={enrichmentJobs} 
+                                                onJobUpdate={() => {
+                                                    // Refresh job status by re-fetching if needed
+                                                    // For now, we rely on socket updates
+                                                }} 
+                                            />
                                         )}
                                         <div className="rounded-2xl border border-[#262626] bg-[#141414] overflow-hidden shadow-2xl">
                                             <WebsetTable

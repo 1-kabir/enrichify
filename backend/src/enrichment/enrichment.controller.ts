@@ -6,6 +6,7 @@ import {
     Param,
     UseGuards,
     Request,
+    ForbiddenException,
 } from '@nestjs/common';
 import { EnrichmentService } from './enrichment.service';
 import { EnrichCellDto } from './dto/enrich-cell.dto';
@@ -34,5 +35,20 @@ export class EnrichmentController {
     @Get('jobs/:jobId')
     getJobStatus(@Param('jobId') jobId: string) {
         return this.enrichmentService.getJobStatus(jobId);
+    }
+
+    @Post('jobs/:jobId/pause')
+    async pauseJob(@Param('jobId') jobId: string, @Request() req) {
+        return this.enrichmentService.pauseJob(jobId, req.user.id);
+    }
+
+    @Post('jobs/:jobId/resume')
+    async resumeJob(@Param('jobId') jobId: string, @Request() req) {
+        return this.enrichmentService.resumeJob(jobId, req.user.id);
+    }
+
+    @Post('jobs/:jobId/stop')
+    async stopJob(@Param('jobId') jobId: string, @Request() req) {
+        return this.enrichmentService.stopJob(jobId, req.user.id);
     }
 }
