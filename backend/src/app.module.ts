@@ -11,6 +11,7 @@ import { WebsetsModule } from './websets/websets.module';
 import { CitationsModule } from './citations/citations.module';
 import { ExportModule } from './export/export.module';
 import { HealthModule } from './health/health.module';
+import { SettingsModule } from './settings/settings.module';
 import { EnrichmentModule } from './enrichment/enrichment.module';
 import { ChatModule } from './chat/chat.module';
 
@@ -48,6 +49,7 @@ import { ChatModule } from './chat/chat.module';
     EnrichmentModule,
     ChatModule,
     HealthModule,
+    SettingsModule,
   ],
 })
 export class AppModule {}
