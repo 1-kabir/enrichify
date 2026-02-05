@@ -29,6 +29,9 @@ Enrichify follows a modern microservices-inspired architecture with clear separa
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌─────────┐    │
 │  │   Auth   │  │  Websets │  │   Chat   │  │ Providers│    │
 │  │  Module  │  │  Module  │  │  Module  │  │  Module  │    │
+│  ├──────────┤  ├──────────┤  ├──────────┤  ├─────────┤    │
+│  │ Export   │  │ Health   │  │Enrichment│  │   More  │    │
+│  │  Module  │  │  Module  │  │  Module  │  │ Modules │    │
 │  └──────────┘  └──────────┘  └──────────┘  └─────────┘    │
 │                                                              │
 │  ┌──────────────────────────────────────────────────┐      │
@@ -160,6 +163,27 @@ Enrichify follows a modern microservices-inspired architecture with clear separa
   - Retry logic
   - Progress tracking
   - Batch processing
+  - Agent swarm architecture
+  - Job partitioning for large datasets
+  - Real-time progress updates via WebSocket
+  - Automatic snapshot creation after job completion
+
+#### Export Module (`src/export`)
+- **Purpose**: Data export functionality
+- **Features**:
+  - CSV, XLSX, and Google Sheets export formats
+  - Asynchronous export processing
+  - Export status tracking
+  - Download URL generation
+  - File cleanup after export
+
+#### Health Module (`src/health`)
+- **Purpose**: System health monitoring
+- **Features**:
+  - PostgreSQL connectivity check
+  - Redis connectivity check
+  - Overall system status reporting
+  - Individual service status reporting
 
 ## Data Flow
 
@@ -204,6 +228,29 @@ Enrichify follows a modern microservices-inspired architecture with clear separa
 6. Backend saves conversation → PostgreSQL
 ```
 
+### Export Flow
+```
+1. User initiates export → Frontend
+2. Frontend → POST /export/websets/{id} → Backend
+3. Backend creates export record → PostgreSQL (status: PENDING)
+4. Backend processes export asynchronously:
+   a. Fetch webset data → PostgreSQL
+   b. Transform data to requested format (CSV/XLSX/GSheets)
+   c. Save exported file to disk
+   d. Update export record → PostgreSQL (status: COMPLETED, exportUrl)
+5. Frontend polls for export status → GET /export/{id}
+6. Frontend downloads file when ready → GET /export/{exportUrl}
+```
+
+### Health Check Flow
+```
+1. System/monitoring tool → GET /health → Backend
+2. Backend checks PostgreSQL connectivity → SELECT 1
+3. Backend checks Redis connectivity → PING
+4. Backend aggregates results
+5. Backend → JSON response with status details → System/monitoring tool
+```
+
 ## Security Considerations
 
 ### Authentication
@@ -227,6 +274,12 @@ Enrichify follows a modern microservices-inspired architecture with clear separa
 - Configurable rate limits per endpoint
 - Protection against abuse
 - Redis-backed rate limiter
+
+### Error Handling
+- Comprehensive error handling for external API failures
+- Specific handling for invalid API keys, rate limits, and insufficient credits
+- Detailed error logging for debugging
+- Graceful degradation when external services are unavailable
 
 ## Scalability
 
@@ -281,8 +334,10 @@ Enrichify follows a modern microservices-inspired architecture with clear separa
 
 ### Health Checks
 - `/health` endpoint
-- Database connectivity
-- Redis connectivity
+- Database connectivity (PostgreSQL)
+- Cache/Queue connectivity (Redis)
+- Overall system status reporting
+- Individual service status reporting
 - External API status (optional)
 
 ## Development Workflow
@@ -349,6 +404,11 @@ docker-compose up -d
 - Verify API keys in `.env`
 - Check rate limits
 - Verify provider service status
+
+#### Health Check Failures
+- Check `/health` endpoint for detailed status
+- Verify PostgreSQL and Redis connectivity
+- Review system logs for specific error details
 
 ## Resources
 

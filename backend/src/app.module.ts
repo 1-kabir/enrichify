@@ -10,6 +10,7 @@ import { ProvidersModule } from './providers/providers.module';
 import { WebsetsModule } from './websets/websets.module';
 import { CitationsModule } from './citations/citations.module';
 import { ExportModule } from './export/export.module';
+import { HealthModule } from './health/health.module';
 import { EnrichmentModule } from './enrichment/enrichment.module';
 import { ChatModule } from './chat/chat.module';
 
@@ -46,6 +47,7 @@ import { ChatModule } from './chat/chat.module';
     ExportModule,
     EnrichmentModule,
     ChatModule,
+    HealthModule,
   ],
 })
 export class AppModule {}

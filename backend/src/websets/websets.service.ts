@@ -160,16 +160,29 @@ export class WebsetsService {
     ): Promise<Webset> {
         const webset = await this.findOne(websetId, userId);
 
-        const version = await this.versionRepository.findOne({
-            where: {
-                websetId,
-                version: revertVersionDto.version,
-            },
-        });
+        let version;
+        if (revertVersionDto.versionId) {
+            // Look up by version ID
+            version = await this.versionRepository.findOne({
+                where: {
+                    id: revertVersionDto.versionId,
+                    websetId,
+                },
+            });
+        } else {
+            // Look up by version number
+            version = await this.versionRepository.findOne({
+                where: {
+                    websetId,
+                    version: revertVersionDto.version,
+                },
+            });
+        }
 
         if (!version) {
+            const identifier = revertVersionDto.versionId || revertVersionDto.version;
             throw new NotFoundException(
-                `Version ${revertVersionDto.version} not found for webset ${websetId}`,
+                `Version ${identifier} not found for webset ${websetId}`,
             );
         }
 
@@ -191,7 +204,7 @@ export class WebsetsService {
         await this.createVersion(
             savedWebset,
             userId,
-            revertVersionDto.changeDescription || `Reverted to version ${revertVersionDto.version}`,
+            revertVersionDto.changeDescription || `Reverted to version ${version.version}`,
         );
 
         return savedWebset;
@@ -232,5 +245,19 @@ export class WebsetsService {
         });
 
         return this.versionRepository.save(version);
+    }
+
+    async createSnapshot(
+        websetId: string,
+        userId: string,
+        changeDescription: string,
+    ): Promise<WebsetVersion> {
+        const webset = await this.findOne(websetId, userId);
+
+        // Increment version number for the snapshot
+        webset.currentVersion += 1;
+        await this.websetRepository.save(webset);
+
+        return this.createVersion(webset, userId, changeDescription);
     }
 }

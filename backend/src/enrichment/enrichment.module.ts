@@ -15,6 +15,7 @@ import { MonitoringService } from './monitoring.service';
 import { DataIntegrityService } from './data-integrity.service';
 import { OptimizationService } from './optimization.service';
 import { ProvidersModule } from '../providers/providers.module';
+import { WebsetsModule } from '../websets/websets.module';
 import { Webset } from '../entities/webset.entity';
 import { WebsetCell } from '../entities/webset-cell.entity';
 import { WebsetCitation } from '../entities/webset-citation.entity';
@@ -30,6 +31,7 @@ import { WebsetCitation } from '../entities/webset-citation.entity';
             },
         }),
         ProvidersModule,
+        WebsetsModule,
     ],
     controllers: [EnrichmentController],
     providers: [

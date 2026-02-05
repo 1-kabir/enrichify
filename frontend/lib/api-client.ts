@@ -90,3 +90,27 @@ class ApiClient {
 
 export const apiClient = new ApiClient();
 export const api = apiClient.instance;
+
+// Helper function to poll export status
+export const pollExportStatus = async (exportId: string, timeout = 60000) => {
+  const startTime = Date.now();
+
+  while (Date.now() - startTime < timeout) {
+    try {
+      const response = await api.get(`/export/${exportId}`);
+
+      if (response.data.status === 'COMPLETED') {
+        return response.data;
+      } else if (response.data.status === 'FAILED') {
+        throw new Error(response.data.errorMessage || 'Export failed');
+      }
+
+      // Wait before next poll
+      await new Promise(resolve => setTimeout(resolve, 2000));
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  throw new Error('Export timeout');
+};

@@ -177,34 +177,39 @@ export class SearchProvidersService {
     const client = this.getOrCreateClient(provider);
     const endpoint = provider.endpoint || 'https://api.exa.ai';
 
-    const response = await client.post(`${endpoint}/search`, {
-      query: request.query,
-      num_results: request.numResults || 10,
-      text: request.includeText || false,
-      start_published_date: request.startPublishedDate,
-      end_published_date: request.endPublishedDate,
-      include_domains: request.domains,
-      exclude_domains: request.excludeDomains,
-      category: request.categories?.[0],
-    }, {
-      headers: {
-        'x-api-key': provider.apiKey,
-        'Content-Type': 'application/json',
-      },
-    });
+    try {
+      const response = await client.post(`${endpoint}/search`, {
+        query: request.query,
+        num_results: request.numResults || 10,
+        text: request.includeText || false,
+        start_published_date: request.startPublishedDate,
+        end_published_date: request.endPublishedDate,
+        include_domains: request.domains,
+        exclude_domains: request.excludeDomains,
+        category: request.categories?.[0],
+      }, {
+        headers: {
+          'x-api-key': provider.apiKey,
+          'Content-Type': 'application/json',
+        },
+      });
 
-    return {
-      results: response.data.results.map((r: any) => ({
-        title: r.title,
-        url: r.url,
-        snippet: r.snippet,
-        content: r.text,
-        publishedDate: r.published_date,
-        author: r.author,
-        score: r.score,
-      })),
-      total: response.data.autoprompt_string ? undefined : response.data.results.length,
-    };
+      return {
+        results: response.data.results.map((r: any) => ({
+          title: r.title,
+          url: r.url,
+          snippet: r.snippet,
+          content: r.text,
+          publishedDate: r.published_date,
+          author: r.author,
+          score: r.score,
+        })),
+        total: response.data.autoprompt_string ? undefined : response.data.results.length,
+      };
+    } catch (error) {
+      this.handleProviderError(error, provider.type, provider.name);
+      throw error;
+    }
   }
 
   private async searchBrave(
@@ -214,26 +219,31 @@ export class SearchProvidersService {
     const client = this.getOrCreateClient(provider);
     const endpoint = provider.endpoint || 'https://api.search.brave.com/res/v1';
 
-    const response = await client.get(`${endpoint}/web/search`, {
-      params: {
-        q: request.query,
-        count: request.numResults || 10,
-      },
-      headers: {
-        'X-Subscription-Token': provider.apiKey,
-        'Accept': 'application/json',
-      },
-    });
+    try {
+      const response = await client.get(`${endpoint}/web/search`, {
+        params: {
+          q: request.query,
+          count: request.numResults || 10,
+        },
+        headers: {
+          'X-Subscription-Token': provider.apiKey,
+          'Accept': 'application/json',
+        },
+      });
 
-    return {
-      results: response.data.web?.results?.map((r: any) => ({
-        title: r.title,
-        url: r.url,
-        snippet: r.description,
-        publishedDate: r.age,
-      })) || [],
-      total: response.data.web?.results?.length,
-    };
+      return {
+        results: response.data.web?.results?.map((r: any) => ({
+          title: r.title,
+          url: r.url,
+          snippet: r.description,
+          publishedDate: r.age,
+        })) || [],
+        total: response.data.web?.results?.length,
+      };
+    } catch (error) {
+      this.handleProviderError(error, provider.type, provider.name);
+      throw error;
+    }
   }
 
   private async searchBing(
@@ -243,25 +253,30 @@ export class SearchProvidersService {
     const client = this.getOrCreateClient(provider);
     const endpoint = provider.endpoint || 'https://api.bing.microsoft.com/v7.0';
 
-    const response = await client.get(`${endpoint}/search`, {
-      params: {
-        q: request.query,
-        count: request.numResults || 10,
-      },
-      headers: {
-        'Ocp-Apim-Subscription-Key': provider.apiKey,
-      },
-    });
+    try {
+      const response = await client.get(`${endpoint}/search`, {
+        params: {
+          q: request.query,
+          count: request.numResults || 10,
+        },
+        headers: {
+          'Ocp-Apim-Subscription-Key': provider.apiKey,
+        },
+      });
 
-    return {
-      results: response.data.webPages?.value?.map((r: any) => ({
-        title: r.name,
-        url: r.url,
-        snippet: r.snippet,
-        publishedDate: r.dateLastCrawled,
-      })) || [],
-      total: response.data.webPages?.totalEstimatedMatches,
-    };
+      return {
+        results: response.data.webPages?.value?.map((r: any) => ({
+          title: r.name,
+          url: r.url,
+          snippet: r.snippet,
+          publishedDate: r.dateLastCrawled,
+        })) || [],
+        total: response.data.webPages?.totalEstimatedMatches,
+      };
+    } catch (error) {
+      this.handleProviderError(error, provider.type, provider.name);
+      throw error;
+    }
   }
 
   private async searchGoogle(
@@ -271,23 +286,28 @@ export class SearchProvidersService {
     const client = this.getOrCreateClient(provider);
     const endpoint = provider.endpoint || 'https://www.googleapis.com/customsearch/v1';
 
-    const response = await client.get(endpoint, {
-      params: {
-        key: provider.apiKey,
-        cx: provider.config?.searchEngineId,
-        q: request.query,
-        num: request.numResults || 10,
-      },
-    });
+    try {
+      const response = await client.get(endpoint, {
+        params: {
+          key: provider.apiKey,
+          cx: provider.config?.searchEngineId,
+          q: request.query,
+          num: request.numResults || 10,
+        },
+      });
 
-    return {
-      results: response.data.items?.map((r: any) => ({
-        title: r.title,
-        url: r.link,
-        snippet: r.snippet,
-      })) || [],
-      total: parseInt(response.data.searchInformation?.totalResults || '0', 10),
-    };
+      return {
+        results: response.data.items?.map((r: any) => ({
+          title: r.title,
+          url: r.link,
+          snippet: r.snippet,
+        })) || [],
+        total: parseInt(response.data.searchInformation?.totalResults || '0', 10),
+      };
+    } catch (error) {
+      this.handleProviderError(error, provider.type, provider.name);
+      throw error;
+    }
   }
 
   private async searchFirecrawl(
@@ -324,22 +344,27 @@ export class SearchProvidersService {
     const client = this.getOrCreateClient(provider);
     const endpoint = provider.endpoint || 'https://api.tavily.com';
 
-    const response = await client.post(`${endpoint}/search`, {
-      api_key: provider.apiKey,
-      query: request.query,
-      max_results: request.numResults || 10,
-      include_raw_content: request.includeText || false,
-    });
+    try {
+      const response = await client.post(`${endpoint}/search`, {
+        api_key: provider.apiKey,
+        query: request.query,
+        max_results: request.numResults || 10,
+        include_raw_content: request.includeText || false,
+      });
 
-    return {
-      results: response.data.results?.map((r: any) => ({
-        title: r.title,
-        url: r.url,
-        snippet: r.content,
-        content: r.raw_content,
-        score: r.score,
-      })) || [],
-    };
+      return {
+        results: response.data.results?.map((r: any) => ({
+          title: r.title,
+          url: r.url,
+          snippet: r.content,
+          content: r.raw_content,
+          score: r.score,
+        })) || [],
+      };
+    } catch (error) {
+      this.handleProviderError(error, provider.type, provider.name);
+      throw error;
+    }
   }
 
   private async searchSerper(
@@ -349,24 +374,29 @@ export class SearchProvidersService {
     const client = this.getOrCreateClient(provider);
     const endpoint = provider.endpoint || 'https://google.serper.dev';
 
-    const response = await client.post(`${endpoint}/search`, {
-      q: request.query,
-      num: request.numResults || 10,
-    }, {
-      headers: {
-        'X-API-KEY': provider.apiKey,
-        'Content-Type': 'application/json',
-      },
-    });
+    try {
+      const response = await client.post(`${endpoint}/search`, {
+        q: request.query,
+        num: request.numResults || 10,
+      }, {
+        headers: {
+          'X-API-KEY': provider.apiKey,
+          'Content-Type': 'application/json',
+        },
+      });
 
-    return {
-      results: response.data.organic?.map((r: any) => ({
-        title: r.title,
-        url: r.link,
-        snippet: r.snippet,
-        publishedDate: r.date,
-      })) || [],
-    };
+      return {
+        results: response.data.organic?.map((r: any) => ({
+          title: r.title,
+          url: r.link,
+          snippet: r.snippet,
+          publishedDate: r.date,
+        })) || [],
+      };
+    } catch (error) {
+      this.handleProviderError(error, provider.type, provider.name);
+      throw error;
+    }
   }
 
   private async searchJina(
@@ -435,5 +465,44 @@ export class SearchProvidersService {
 
   private sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  private handleProviderError(error: any, providerType: SearchProviderType, providerName: string) {
+    this.logger.error(`Provider error for ${providerName} (${providerType}): ${error.message}`);
+
+    // Log specific error details to console
+    console.error(`Provider error details:`, {
+      providerType,
+      providerName,
+      errorStatus: error.response?.status || error.code,
+      errorMessage: error.message,
+      errorStack: error.stack
+    });
+
+    // Handle different types of errors
+    if (error.response?.status === 401 || error.response?.status === 403 || error.message.includes('invalid_api_key')) {
+      throw new HttpException(
+        `Invalid API key for ${providerName}. Please check your credentials.`,
+        HttpStatus.UNAUTHORIZED
+      );
+    } else if (error.response?.status === 429 || error.message.includes('rate limit')) {
+      throw new HttpException(
+        `Rate limit exceeded for ${providerName}. Please try again later.`,
+        HttpStatus.TOO_MANY_REQUESTS
+      );
+    } else if (error.response?.status === 402 || error.message.includes('credit') || error.message.includes('quota')) {
+      throw new HttpException(
+        `Insufficient credits for ${providerName}. Please check your account balance.`,
+        HttpStatus.PAYMENT_REQUIRED
+      );
+    } else if (error.response?.status === 404) {
+      throw new HttpException(
+        `Resource not found for ${providerName}. Please check your configuration.`,
+        HttpStatus.NOT_FOUND
+      );
+    } else {
+      // For other errors, preserve the original error
+      throw error;
+    }
   }
 }

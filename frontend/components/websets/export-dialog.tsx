@@ -20,54 +20,60 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Download, FileSpreadsheet, Table2 } from "lucide-react";
+import { Download, FileSpreadsheet, Table2, ExternalLink } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { api, pollExportStatus } from "@/lib/api-client";
 
 interface ExportDialogProps {
+  websetId: string;
   websetName: string;
   isOpen: boolean;
   onClose: () => void;
-  onExport: (format: ExportFormat) => void;
 }
 
 export function ExportDialog({
+  websetId,
   websetName,
   isOpen,
   onClose,
-  onExport,
 }: ExportDialogProps) {
   const [format, setFormat] = useState<"csv" | "xlsx" | "google-sheets">("csv");
   const [fileName, setFileName] = useState(`${websetName}-export`);
   const [isExporting, setIsExporting] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const handleExport = async () => {
     setIsExporting(true);
     setProgress(0);
-
-    // Simulate progress
-    const interval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 90) {
-          clearInterval(interval);
-          return 90;
-        }
-        return prev + 10;
-      });
-    }, 200);
+    setError(null);
+    setDownloadUrl(null);
 
     try {
-      await onExport({ type: format, fileName });
-      setProgress(100);
-      setTimeout(() => {
-        setIsExporting(false);
-        setProgress(0);
-        onClose();
-      }, 500);
-    } catch (error) {
-      clearInterval(interval);
+      // Initiate export
+      const response = await api.post(`/export/websets/${websetId}`, {
+        format: format === "google-sheets" ? "gsheet" : format,
+        fileName
+      });
+
+      const exportId = response.data.id;
+
+      // Poll for completion
+      const exportResult = await pollExportStatus(exportId);
+
+      if (exportResult.exportUrl) {
+        setDownloadUrl(exportResult.exportUrl);
+        setProgress(100);
+
+        // Open download in new tab
+        window.open(`${api.defaults.baseURL}${exportResult.exportUrl}`, '_blank');
+      }
+    } catch (err) {
+      console.error("Export failed:", err);
+      setError(err instanceof Error ? err.message : "Export failed");
+    } finally {
       setIsExporting(false);
-      setProgress(0);
     }
   };
 
@@ -136,16 +142,36 @@ export function ExportDialog({
             />
           </div>
 
-          {isExporting && (
+          {(isExporting || progress > 0) && (
             <div className="space-y-2">
               <Label>Exporting...</Label>
               <Progress value={progress} />
             </div>
           )}
+
+          {downloadUrl && (
+            <div className="space-y-2 p-3 bg-green-50 border border-green-200 rounded-md">
+              <p className="text-sm text-green-800">Export completed successfully!</p>
+              <a
+                href={`${api.defaults.baseURL}${downloadUrl}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-sm text-green-700 hover:text-green-900 underline"
+              >
+                Download file <ExternalLink className="h-3 w-3" />
+              </a>
+            </div>
+          )}
+
+          {error && (
+            <div className="space-y-2 p-3 bg-red-50 border border-red-200 rounded-md">
+              <p className="text-sm text-red-800">Export failed: {error}</p>
+            </div>
+          )}
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={isExporting}>
-            Cancel
+            Close
           </Button>
           <Button onClick={handleExport} disabled={isExporting}>
             <FormatIcon className="mr-2 h-4 w-4" />

@@ -159,24 +159,29 @@ export class LLMProvidersService {
     const client = this.getOrCreateOpenAIClient(provider);
     const model = request.model || provider.config?.defaultModel || 'gpt-3.5-turbo';
 
-    const completion = await client.chat.completions.create({
-      model,
-      messages: request.messages as any,
-      temperature: request.temperature,
-      max_tokens: request.maxTokens,
-      stream: false,
-    });
+    try {
+      const completion = await client.chat.completions.create({
+        model,
+        messages: request.messages as any,
+        temperature: request.temperature,
+        max_tokens: request.maxTokens,
+        stream: false,
+      });
 
-    return {
-      content: completion.choices[0].message.content || '',
-      model: completion.model,
-      tokensUsed: completion.usage?.total_tokens,
-      finishReason: completion.choices[0].finish_reason,
-      metadata: {
-        id: completion.id,
-        created: completion.created,
-      },
-    };
+      return {
+        content: completion.choices[0].message.content || '',
+        model: completion.model,
+        tokensUsed: completion.usage?.total_tokens,
+        finishReason: completion.choices[0].finish_reason,
+        metadata: {
+          id: completion.id,
+          created: completion.created,
+        },
+      };
+    } catch (error) {
+      this.handleProviderError(error, provider.type, provider.name);
+      throw error;
+    }
   }
 
   private async executeClaudeRequest(
@@ -189,26 +194,31 @@ export class LLMProvidersService {
     const systemMessage = request.messages.find((m) => m.role === 'system');
     const userMessages = request.messages.filter((m) => m.role !== 'system');
 
-    const message = await client.messages.create({
-      model,
-      max_tokens: request.maxTokens || 1024,
-      temperature: request.temperature,
-      system: systemMessage?.content,
-      messages: userMessages.map((m) => ({
-        role: m.role === 'user' ? 'user' : 'assistant',
-        content: m.content,
-      })) as any,
-    });
+    try {
+      const message = await client.messages.create({
+        model,
+        max_tokens: request.maxTokens || 1024,
+        temperature: request.temperature,
+        system: systemMessage?.content,
+        messages: userMessages.map((m) => ({
+          role: m.role === 'user' ? 'user' : 'assistant',
+          content: m.content,
+        })) as any,
+      });
 
-    return {
-      content: message.content[0].type === 'text' ? message.content[0].text : '',
-      model: message.model,
-      tokensUsed: message.usage.input_tokens + message.usage.output_tokens,
-      finishReason: message.stop_reason,
-      metadata: {
-        id: message.id,
-      },
-    };
+      return {
+        content: message.content[0].type === 'text' ? message.content[0].text : '',
+        model: message.model,
+        tokensUsed: message.usage.input_tokens + message.usage.output_tokens,
+        finishReason: message.stop_reason,
+        metadata: {
+          id: message.id,
+        },
+      };
+    } catch (error) {
+      this.handleProviderError(error, provider.type, provider.name);
+      throw error;
+    }
   }
 
   private async executeGeminiRequest(
@@ -222,30 +232,35 @@ export class LLMProvidersService {
     const systemMessage = request.messages.find((m) => m.role === 'system');
     const userMessages = request.messages.filter((m) => m.role !== 'system');
 
-    const chat = model.startChat({
-      generationConfig: {
-        temperature: request.temperature,
-        maxOutputTokens: request.maxTokens,
-      },
-      history: userMessages.slice(0, -1).map((m) => ({
-        role: m.role === 'user' ? 'user' : 'model',
-        parts: [{ text: m.content }],
-      })),
-    });
+    try {
+      const chat = model.startChat({
+        generationConfig: {
+          temperature: request.temperature,
+          maxOutputTokens: request.maxTokens,
+        },
+        history: userMessages.slice(0, -1).map((m) => ({
+          role: m.role === 'user' ? 'user' : 'model',
+          parts: [{ text: m.content }],
+        })),
+      });
 
-    const lastMessage = userMessages[userMessages.length - 1];
-    const result = await chat.sendMessage(lastMessage.content);
-    const response = result.response;
+      const lastMessage = userMessages[userMessages.length - 1];
+      const result = await chat.sendMessage(lastMessage.content);
+      const response = result.response;
 
-    return {
-      content: response.text(),
-      model: modelName,
-      tokensUsed: response.usageMetadata?.totalTokenCount,
-      metadata: {
-        promptTokens: response.usageMetadata?.promptTokenCount,
-        candidatesTokens: response.usageMetadata?.candidatesTokenCount,
-      },
-    };
+      return {
+        content: response.text(),
+        model: modelName,
+        tokensUsed: response.usageMetadata?.totalTokenCount,
+        metadata: {
+          promptTokens: response.usageMetadata?.promptTokenCount,
+          candidatesTokens: response.usageMetadata?.candidatesTokenCount,
+        },
+      };
+    } catch (error) {
+      this.handleProviderError(error, provider.type, provider.name);
+      throw error;
+    }
   }
 
   private getOrCreateOpenAIClient(provider: LLMProvider): OpenAI {
@@ -291,5 +306,44 @@ export class LLMProvidersService {
 
   private sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  private handleProviderError(error: any, providerType: LLMProviderType, providerName: string) {
+    this.logger.error(`Provider error for ${providerName} (${providerType}): ${error.message}`);
+
+    // Log specific error details to console
+    console.error(`Provider error details:`, {
+      providerType,
+      providerName,
+      errorStatus: error.status || error.code || error.statusCode,
+      errorMessage: error.message,
+      errorStack: error.stack
+    });
+
+    // Handle different types of errors
+    if (error.status === 401 || error.status === 403 || error.code === 'invalid_api_key') {
+      throw new HttpException(
+        `Invalid API key for ${providerName}. Please check your credentials.`,
+        HttpStatus.UNAUTHORIZED
+      );
+    } else if (error.status === 429 || error.code === 'rate_limit_exceeded') {
+      throw new HttpException(
+        `Rate limit exceeded for ${providerName}. Please try again later.`,
+        HttpStatus.TOO_MANY_REQUESTS
+      );
+    } else if (error.status === 402 || error.code === 'insufficient_funds' || error.message.includes('credit')) {
+      throw new HttpException(
+        `Insufficient credits for ${providerName}. Please check your account balance.`,
+        HttpStatus.PAYMENT_REQUIRED
+      );
+    } else if (error.status === 404) {
+      throw new HttpException(
+        `Resource not found for ${providerName}. Please check your configuration.`,
+        HttpStatus.NOT_FOUND
+      );
+    } else {
+      // For other errors, preserve the original error
+      throw error;
+    }
   }
 }

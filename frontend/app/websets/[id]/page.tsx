@@ -65,6 +65,7 @@ export default function WebsetPage() {
     const [isEnrichmentDialogOpen, setIsEnrichmentDialogOpen] = useState(false);
     const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
     const [isVersionHistoryOpen, setIsVersionHistoryOpen] = useState(false);
+    const [versions, setVersions] = useState<WebsetVersion[]>([]);
 
     // Active enrichment states
     const [selectedLLM, setSelectedLLM] = useState<string | undefined>();
@@ -152,6 +153,27 @@ export default function WebsetPage() {
             socket.disconnect();
         };
     }, [websetId]);
+
+    // Fetch versions when version history dialog is opened
+    useEffect(() => {
+        if (isVersionHistoryOpen && websetId) {
+            const fetchVersions = async () => {
+                try {
+                    const response = await api.get(`/websets/${websetId}/versions`);
+                    setVersions(response.data);
+                } catch (error) {
+                    console.error("Failed to fetch versions:", error);
+                    toast({
+                        title: "Error",
+                        description: "Could not load version history.",
+                        variant: "destructive"
+                    });
+                }
+            };
+
+            fetchVersions();
+        }
+    }, [isVersionHistoryOpen, websetId]);
 
     const handleApprovePlan = async (plan: ExecutionPlan) => {
         try {
@@ -516,18 +538,37 @@ export default function WebsetPage() {
                     />
 
                     <ExportDialog
+                        websetId={websetId}
                         websetName={webset.name}
                         isOpen={isExportDialogOpen}
                         onClose={() => setIsExportDialogOpen(false)}
-                        onExport={handleExport}
                     />
 
                     <VersionHistory
-                        versions={[]}
+                        versions={versions}
                         currentVersion={webset.currentVersion}
                         isOpen={isVersionHistoryOpen}
                         onClose={() => setIsVersionHistoryOpen(false)}
-                        onRestore={(v) => toast({ title: `Restoring version ${v}` })}
+                        onRestore={async (versionId) => {
+                            try {
+                                await api.post(`/websets/${websetId}/revert`, {
+                                    versionId: versionId,
+                                    changeDescription: `Restored to version ${versionId}`
+                                });
+                                toast({
+                                    title: "Version restored",
+                                    description: "The webset has been restored to the selected version."
+                                });
+                                // Refresh the page to show the restored data
+                                router.refresh();
+                            } catch (error) {
+                                toast({
+                                    title: "Error",
+                                    description: "Could not restore the version.",
+                                    variant: "destructive"
+                                });
+                            }
+                        }}
                     />
                 </div>
             </AppLayout>

@@ -83,6 +83,20 @@ enrichify/
 
 ## 🚀 **Quick Start**
 
+### Prerequisites
+
+Before starting, ensure you have:
+- Docker and Docker Compose installed
+- API keys for at least one LLM provider (OpenAI, Anthropic, etc.)
+- API keys for at least one search provider (Tavily, Exa, etc.)
+
+### Understanding the BYOK Model
+
+Enrichify uses a **Bring Your Own Key (BYOK)** model, meaning you provide your own API keys for LLM and search providers. This ensures:
+- You maintain control over your API usage and billing
+- No third-party access to your API keys
+- Direct payment to providers for services used
+
 ### Using Docker Compose (Recommended)
 
 ```bash
@@ -92,7 +106,10 @@ cd enrichify
 
 # Create environment file
 cp .env.example .env
+
 # Edit .env and add your API keys
+# See detailed configuration below
+nano .env
 
 # Start all services
 docker-compose up -d
@@ -103,6 +120,47 @@ docker-compose up -d
 ```
 
 > For detailed setup instructions, see [Quick Start Guide](docs/guides/QUICKSTART.md)
+
+### Configuration Guide
+
+#### Required Environment Variables
+
+**Database Configuration:**
+- `DATABASE_URL`: PostgreSQL connection string
+- `POSTGRES_USER`: Database username
+- `POSTGRES_PASSWORD`: Database password
+- `POSTGRES_DB`: Database name
+
+**Redis Configuration:**
+- `REDIS_HOST`: Redis server hostname
+- `REDIS_PORT`: Redis server port
+
+**Authentication:**
+- `JWT_SECRET`: Secret key for JWT token signing (use a strong, random string)
+
+**Provider API Keys (BYOK Model):**
+- At least one LLM provider key (OpenAI, Anthropic, etc.)
+- At least one search provider key (Tavily, Exa, etc.)
+
+#### Setting Up API Keys
+
+**LLM Providers:**
+1. **OpenAI**: Visit [platform.openai.com](https://platform.openai.com/) to get your API key
+2. **Anthropic Claude**: Visit [anthropic.com](https://www.anthropic.com/) for API access
+3. **Google Gemini**: Visit [ai.google.dev](https://ai.google.dev/) for API access
+4. **Other providers**: Refer to individual provider documentation
+
+**Search Providers:**
+1. **Tavily**: Visit [tavily.com](https://tavily.com/) for API access
+2. **Exa**: Visit [exa.ai](https://exa.ai/) for API access
+3. **Brave Search**: Visit [brave.com/search/api](https://brave.com/search/api/) for API access
+4. **Serper**: Visit [serper.dev](https://serper.dev/) for API access
+
+> For complete configuration documentation, see [Deployment Guide](docs/DEPLOYMENT.md)
+
+### Reverse Proxy Configuration
+
+For production deployments, configure a reverse proxy (Nginx, Apache, etc.) to handle SSL termination and route traffic to the appropriate services. See the [Deployment Guide](docs/DEPLOYMENT.md) for detailed configuration examples.
 
 ---
 

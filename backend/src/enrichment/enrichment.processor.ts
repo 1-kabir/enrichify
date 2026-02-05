@@ -8,6 +8,7 @@ import { Webset } from '../entities/webset.entity';
 import { WebsetCitation } from '../entities/webset-citation.entity';
 import { LLMProvidersService } from '../providers/llm/llm-providers.service';
 import { SearchProvidersService } from '../providers/search/search-providers.service';
+import { WebsetsService } from '../websets/websets.service';
 
 import { EnrichmentGateway } from './enrichment.gateway';
 
@@ -25,6 +26,7 @@ export class EnrichmentProcessor extends WorkerHost {
         private citationRepository: Repository<WebsetCitation>,
         private llmProvidersService: LLMProvidersService,
         private searchProvidersService: SearchProvidersService,
+        private websetsService: WebsetsService,
         private enrichmentGateway: EnrichmentGateway,
     ) {
         super();
@@ -48,7 +50,7 @@ export class EnrichmentProcessor extends WorkerHost {
     }
 
     private async processParentJob(job: Job): Promise<any> {
-        const { websetId, totalRows } = job.data;
+        const { websetId, totalRows, userId } = job.data;
 
         this.logger.log(`Processing parent enrichment job ${job.id} for ${totalRows} rows`);
 
@@ -83,6 +85,13 @@ export class EnrichmentProcessor extends WorkerHost {
                     totalRows,
                     status: 'completed',
                 });
+
+                // Create a snapshot after job completion
+                try {
+                    await this.websetsService.createSnapshot(websetId, userId, `Enrichment job completed: ${job.id}`);
+                } catch (error) {
+                    this.logger.error(`Failed to create snapshot after enrichment job ${job.id}: ${error.message}`);
+                }
             }
         }, 1000); // Update progress every second
 
@@ -95,7 +104,7 @@ export class EnrichmentProcessor extends WorkerHost {
     }
 
     private async processBatchParentJob(job: Job): Promise<any> {
-        const { websetId, totalRows, chunkCount } = job.data;
+        const { websetId, totalRows, chunkCount, userId } = job.data;
 
         this.logger.log(`Processing batch parent enrichment job ${job.id} for ${totalRows} rows in ${chunkCount} chunks`);
 
@@ -127,6 +136,13 @@ export class EnrichmentProcessor extends WorkerHost {
                     totalRows,
                     status: 'completed',
                 });
+
+                // Create a snapshot after job completion
+                try {
+                    await this.websetsService.createSnapshot(websetId, userId, `Batch enrichment job completed: ${job.id}`);
+                } catch (error) {
+                    this.logger.error(`Failed to create snapshot after batch enrichment job ${job.id}: ${error.message}`);
+                }
             }
         }, 1000); // Update progress every second
 
@@ -406,6 +422,13 @@ export class EnrichmentProcessor extends WorkerHost {
         }
 
         this.logger.log(`Agent ${agentId} completed ${completedCount}/${totalRows} rows for webset ${websetId}`);
+
+        // Create a snapshot after job completion
+        try {
+            await this.websetsService.createSnapshot(websetId, userId, `Agent work job completed: ${job.id}`);
+        } catch (error) {
+            this.logger.error(`Failed to create snapshot after agent work job ${job.id}: ${error.message}`);
+        }
 
         return {
             success: true,
