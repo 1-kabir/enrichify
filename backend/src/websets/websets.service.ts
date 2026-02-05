@@ -1,6 +1,9 @@
 import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as XLSX from 'xlsx';
 import { Webset, WebsetStatus } from '../entities/webset.entity';
 import { WebsetVersion } from '../entities/webset-version.entity';
 import { WebsetCell } from '../entities/webset-cell.entity';
@@ -8,6 +11,9 @@ import { CreateWebsetDto } from './dto/create-webset.dto';
 import { UpdateWebsetDto } from './dto/update-webset.dto';
 import { UpdateCellDto } from './dto/update-cell.dto';
 import { RevertVersionDto } from './dto/revert-version.dto';
+
+// Import csv-parser without types
+const csvParser = require('csv-parser');
 
 @Injectable()
 export class WebsetsService {
@@ -259,5 +265,118 @@ export class WebsetsService {
         await this.websetRepository.save(webset);
 
         return this.createVersion(webset, userId, changeDescription);
+    }
+
+    async importFromFile(file: Express.Multer.File, userId: string): Promise<Webset> {
+        if (!file) {
+            throw new BadRequestException('No file uploaded');
+        }
+
+        // Validate file type
+        const allowedTypes = ['.csv', '.xlsx', '.xls'];
+        const fileExtension = path.extname(file.originalname).toLowerCase();
+        
+        if (!allowedTypes.includes(fileExtension)) {
+            throw new BadRequestException(`Invalid file type. Allowed types: ${allowedTypes.join(', ')}`);
+        }
+
+        // Parse the file based on its extension
+        let data: any[] = [];
+        
+        try {
+            if (fileExtension === '.csv') {
+                data = await this.parseCsvFile(file.path);
+            } else {
+                data = await this.parseExcelFile(file.buffer);
+            }
+        } catch (error) {
+            throw new BadRequestException(`Error parsing file: ${error.message}`);
+        }
+
+        if (!data || data.length === 0) {
+            throw new BadRequestException('File is empty or contains no valid data');
+        }
+
+        // Create a new webset with the first few rows of data
+        const firstRow = data[0];
+        const columnNames = Object.keys(firstRow);
+        
+        // Create column definitions from the headers
+        const columnDefinitions = columnNames.map((name, index) => ({
+            id: `col_${index}_${Date.now()}`, // Generate unique IDs
+            name: name,
+            type: 'string', // Default to string type, could be enhanced to detect types
+        }));
+
+        // Create the webset
+        const createWebsetDto: CreateWebsetDto = {
+            name: path.basename(file.originalname, fileExtension) || 'Imported Webset',
+            description: `Imported from ${file.originalname}`,
+            columnDefinitions,
+            status: WebsetStatus.ACTIVE,
+        };
+
+        const webset = await this.create(createWebsetDto, userId);
+
+        // Insert the data into the webset
+        for (let rowIndex = 0; rowIndex < data.length; rowIndex++) {
+            const rowData = data[rowIndex];
+            
+            for (const [colIndex, columnName] of columnNames.entries()) {
+                const columnDef = columnDefinitions[colIndex];
+                
+                if (columnDef && rowData[columnName] !== undefined) {
+                    await this.updateCell(
+                        webset.id,
+                        {
+                            row: rowIndex,
+                            column: columnDef.id,
+                            value: String(rowData[columnName]),
+                        },
+                        userId
+                    );
+                }
+            }
+        }
+
+        // Update row count
+        webset.rowCount = data.length;
+        await this.websetRepository.save(webset);
+
+        return webset;
+    }
+
+    private parseCsvFile(filePath: string): Promise<any[]> {
+        return new Promise((resolve, reject) => {
+            const results: any[] = [];
+            const stream = fs.createReadStream(filePath).pipe(csvParser());
+
+            stream.on('data', (data) => results.push(data));
+            stream.on('end', () => {
+                // Clean up the temporary file
+                fs.unlinkSync(filePath);
+                resolve(results);
+            });
+            stream.on('error', (error) => {
+                // Clean up the temporary file
+                fs.unlinkSync(filePath);
+                reject(error);
+            });
+        });
+    }
+
+    private parseExcelFile(buffer: Buffer): Promise<any[]> {
+        try {
+            const workbook = XLSX.read(buffer, { type: 'buffer' });
+            const sheetName = workbook.SheetNames[0]; // Use the first sheet
+            const worksheet = workbook.Sheets[sheetName];
+            
+            // Convert to JSON
+            const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
+            
+            return Promise.resolve(jsonData);
+        } catch (error) {
+            return Promise.reject(error);
+        }
     }
 }

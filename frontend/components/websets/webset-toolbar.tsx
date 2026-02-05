@@ -18,7 +18,9 @@ import {
   Plus,
   Trash2,
   Copy,
+  Upload
 } from "lucide-react";
+import { FileUploadDialog } from "./file-upload-dialog";
 
 interface WebsetToolbarProps {
   onExport: () => void;
@@ -44,6 +46,7 @@ export function WebsetToolbar({
   return (
     <div className="flex items-center justify-between gap-2 p-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex items-center gap-2">
+        <FileUploadDialog />
         <Button onClick={onAddRow} size="sm">
           <Plus className="mr-2 h-4 w-4" />
           Add Row

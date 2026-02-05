@@ -8,7 +8,10 @@ import {
   Delete,
   UseGuards,
   Request,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { WebsetsService } from './websets.service';
 import { CreateWebsetDto } from './dto/create-webset.dto';
 import { UpdateWebsetDto } from './dto/update-webset.dto';
@@ -72,5 +75,14 @@ export class WebsetsController {
     @Request() req,
   ) {
     return this.websetsService.revertToVersion(id, revertVersionDto, req.user.id);
+  }
+
+  @Post('upload')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadFile(
+    @UploadedFile() file: Express.Multer.File,
+    @Request() req,
+  ) {
+    return this.websetsService.importFromFile(file, req.user.id);
   }
 }
