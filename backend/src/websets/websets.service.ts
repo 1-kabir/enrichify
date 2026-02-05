@@ -379,4 +379,104 @@ export class WebsetsService {
             return Promise.reject(error);
         }
     }
+
+    async verifyWebset(
+        websetId: string,
+        userId: string,
+    ): Promise<any> {
+        const webset = await this.findOne(websetId, userId);
+
+        // Perform basic verification checks
+        const cells = await this.cellRepository.find({
+            where: { websetId: webset.id },
+        });
+
+        // Check for orphaned cells (cells pointing to non-existent columns)
+        const validColumnIds = webset.columnDefinitions.map(col => col.id);
+        const orphanedCells = cells.filter(cell => !validColumnIds.includes(cell.column));
+
+        // Check for data type consistency
+        const typeMismatchIssues = [];
+        for (const cell of cells) {
+            const columnDef = webset.columnDefinitions.find(col => col.id === cell.column);
+            if (columnDef && columnDef.type) {
+                const dataTypeValid = this.validateDataType(cell.value, columnDef.type);
+                if (!dataTypeValid) {
+                    typeMismatchIssues.push({
+                        cellId: cell.id,
+                        row: cell.row,
+                        column: cell.column,
+                        value: cell.value,
+                        expectedType: columnDef.type,
+                        actualType: typeof cell.value,
+                    });
+                }
+            }
+        }
+
+        // Check for duplicate rows (based on all values in a row)
+        const rowValuesMap = new Map<string, number[]>();
+        for (const cell of cells) {
+            const rowKey = `${cell.row}`;
+            if (!rowValuesMap.has(rowKey)) {
+                rowValuesMap.set(rowKey, []);
+            }
+            rowValuesMap.get(rowKey).push(cell.row);
+        }
+
+        // Check for missing required fields
+        const requiredColumns = webset.columnDefinitions.filter(col => col.required);
+        const missingRequiredFields = [];
+        for (const cell of cells) {
+            const columnDef = requiredColumns.find(col => col.id === cell.column);
+            if (columnDef && (!cell.value || cell.value.toString().trim() === '')) {
+                missingRequiredFields.push({
+                    row: cell.row,
+                    column: cell.column,
+                    columnName: columnDef.name,
+                });
+            }
+        }
+
+        return {
+            websetId,
+            isValid: orphanedCells.length === 0 && typeMismatchIssues.length === 0 && missingRequiredFields.length === 0,
+            issues: {
+                orphanedCells: orphanedCells.length,
+                typeMismatches: typeMismatchIssues.length,
+                missingRequiredFields: missingRequiredFields.length,
+            },
+            details: {
+                orphanedCells,
+                typeMismatches: typeMismatchIssues,
+                missingRequiredFields,
+            },
+            timestamp: new Date(),
+        };
+    }
+
+    private validateDataType(value: any, expectedType: string): boolean {
+        if (value === null || value === undefined) return true; // Allow null values
+
+        switch (expectedType) {
+            case 'string':
+                return typeof value === 'string';
+            case 'number':
+                return typeof value === 'number' && !isNaN(value);
+            case 'boolean':
+                return typeof value === 'boolean';
+            case 'url':
+                try {
+                    new URL(value);
+                    return true;
+                } catch {
+                    return false;
+                }
+            case 'email':
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return typeof value === 'string' && emailRegex.test(value);
+            default:
+                return true; // Skip validation for unknown types
+        }
+    }
 }

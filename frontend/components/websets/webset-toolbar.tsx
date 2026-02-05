@@ -18,7 +18,8 @@ import {
   Plus,
   Trash2,
   Copy,
-  Upload
+  Upload,
+  ShieldCheck
 } from "lucide-react";
 import { FileUploadDialog } from "./file-upload-dialog";
 
@@ -28,6 +29,7 @@ interface WebsetToolbarProps {
   onVersionHistory: () => void;
   onEnrich: () => void;
   onAddRow: () => void;
+  onVerify: () => void;
   onDeleteRows?: () => void;
   onDuplicate?: () => void;
   hasSelectedRows?: boolean;
@@ -39,6 +41,7 @@ export function WebsetToolbar({
   onVersionHistory,
   onEnrich,
   onAddRow,
+  onVerify,
   onDeleteRows,
   onDuplicate,
   hasSelectedRows = false,
@@ -54,6 +57,10 @@ export function WebsetToolbar({
         <Button onClick={onEnrich} variant="default" size="sm">
           <Sparkles className="mr-2 h-4 w-4" />
           Enrich
+        </Button>
+        <Button onClick={onVerify} variant="outline" size="sm">
+          <ShieldCheck className="mr-2 h-4 w-4" />
+          Verify Data
         </Button>
         <Separator orientation="vertical" className="h-6" />
         {hasSelectedRows && (

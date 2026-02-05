@@ -85,4 +85,12 @@ export class WebsetsController {
   ) {
     return this.websetsService.importFromFile(file, req.user.id);
   }
+
+  @Post(':id/verify')
+  verifyWebset(
+    @Param('id') id: string,
+    @Request() req,
+  ) {
+    return this.websetsService.verifyWebset(id, req.user.id);
+  }
 }

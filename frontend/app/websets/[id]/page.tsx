@@ -28,6 +28,7 @@ import { EnrichmentProgress } from "@/components/websets/enrichment-progress";
 import { ExportDialog } from "@/components/websets/export-dialog";
 import { VersionHistory } from "@/components/websets/version-history";
 import { PlanningPhase } from "@/components/websets/planning-phase";
+import { VerificationDialog } from "@/components/websets/verification-dialog";
 import { AppLayout } from "@/components/layout/app-layout";
 import { ProtectedRoute } from "@/components/protected-route";
 import { Button } from "@/components/ui/button";
@@ -65,6 +66,7 @@ export default function WebsetPage() {
     const [isEnrichmentDialogOpen, setIsEnrichmentDialogOpen] = useState(false);
     const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
     const [isVersionHistoryOpen, setIsVersionHistoryOpen] = useState(false);
+    const [isVerificationDialogOpen, setIsVerificationDialogOpen] = useState(false);
     const [versions, setVersions] = useState<WebsetVersion[]>([]);
 
     // Active enrichment states
@@ -461,6 +463,7 @@ export default function WebsetPage() {
                                 onVersionHistory={() => setIsVersionHistoryOpen(true)}
                                 onEnrich={handleEnrichClick}
                                 onAddRow={handleAddRow}
+                                onVerify={() => setIsVerificationDialogOpen(true)}
                                 hasSelectedRows={selectedRows.length > 0}
                             />
                             <div className="flex-1 overflow-auto p-4 custom-scrollbar">
@@ -580,6 +583,12 @@ export default function WebsetPage() {
                                 });
                             }
                         }}
+                    />
+
+                    <VerificationDialog
+                        websetId={websetId}
+                        isOpen={isVerificationDialogOpen}
+                        onClose={() => setIsVerificationDialogOpen(false)}
                     />
                 </div>
             </AppLayout>
