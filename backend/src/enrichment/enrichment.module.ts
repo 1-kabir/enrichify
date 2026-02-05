@@ -5,6 +5,7 @@ import { EnrichmentService } from './enrichment.service';
 import { EnrichmentController } from './enrichment.controller';
 import { EnrichmentProcessor } from './enrichment.processor';
 import { EnrichmentGateway } from './enrichment.gateway';
+import { EnrichmentHistoryService } from './enrichment-history.service';
 import { PlanningService } from './planning.service';
 import { JobPartitionerService } from './job-partitioner.service';
 import { AgentManagerService } from './agent-manager.service';
@@ -19,10 +20,11 @@ import { WebsetsModule } from '../websets/websets.module';
 import { Webset } from '../entities/webset.entity';
 import { WebsetCell } from '../entities/webset-cell.entity';
 import { WebsetCitation } from '../entities/webset-citation.entity';
+import { EnrichmentJobHistory } from '../entities/enrichment-job-history.entity';
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([Webset, WebsetCell, WebsetCitation]),
+        TypeOrmModule.forFeature([Webset, WebsetCell, WebsetCitation, EnrichmentJobHistory]),
         BullModule.registerQueue({
             name: 'enrichment',
             defaultJobOptions: {
@@ -38,6 +40,7 @@ import { WebsetCitation } from '../entities/webset-citation.entity';
         EnrichmentService,
         EnrichmentProcessor,
         EnrichmentGateway,
+        EnrichmentHistoryService,
         PlanningService,
         JobPartitionerService,
         AgentManagerService,

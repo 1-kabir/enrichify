@@ -6,9 +6,11 @@ import { Repository } from 'typeorm';
 import { WebsetCell } from '../entities/webset-cell.entity';
 import { Webset } from '../entities/webset.entity';
 import { WebsetCitation } from '../entities/webset-citation.entity';
+import { EnrichmentJobStatus } from '../entities/enrichment-job-history.entity';
 import { LLMProvidersService } from '../providers/llm/llm-providers.service';
 import { SearchProvidersService } from '../providers/search/search-providers.service';
 import { WebsetsService } from '../websets/websets.service';
+import { EnrichmentHistoryService } from './enrichment-history.service';
 
 import { EnrichmentGateway } from './enrichment.gateway';
 
@@ -27,6 +29,7 @@ export class EnrichmentProcessor extends WorkerHost {
         private llmProvidersService: LLMProvidersService,
         private searchProvidersService: SearchProvidersService,
         private websetsService: WebsetsService,
+        private enrichmentHistoryService: EnrichmentHistoryService,
         private enrichmentGateway: EnrichmentGateway,
     ) {
         super();
@@ -50,9 +53,29 @@ export class EnrichmentProcessor extends WorkerHost {
     }
 
     private async processParentJob(job: Job): Promise<any> {
-        const { websetId, totalRows, userId } = job.data;
+        const { websetId, totalRows, userId, llmProviderId, searchProviderId, column } = job.data;
 
         this.logger.log(`Processing parent enrichment job ${job.id} for ${totalRows} rows`);
+
+        // Create job history record
+        await this.enrichmentHistoryService.createJobRecord(
+            websetId,
+            userId,
+            job.id,
+            {
+                totalRows,
+                llmProviderId,
+                searchProviderId,
+                column,
+                type: 'parent'
+            }
+        );
+
+        // Update job status to running
+        await this.enrichmentHistoryService.updateJobStatus(
+            job.id,
+            EnrichmentJobStatus.RUNNING
+        );
 
         // Wait for all child jobs to complete
         const children = await job.getChildren();
@@ -86,6 +109,17 @@ export class EnrichmentProcessor extends WorkerHost {
                     status: 'completed',
                 });
 
+                // Update job status to completed
+                await this.enrichmentHistoryService.updateJobStatus(
+                    job.id,
+                    EnrichmentJobStatus.COMPLETED,
+                    {
+                        totalRows,
+                        processedRows: totalRows,
+                        successRate: 100,
+                    }
+                );
+
                 // Create a snapshot after job completion
                 try {
                     await this.websetsService.createSnapshot(websetId, userId, `Enrichment job completed: ${job.id}`);
@@ -104,9 +138,30 @@ export class EnrichmentProcessor extends WorkerHost {
     }
 
     private async processBatchParentJob(job: Job): Promise<any> {
-        const { websetId, totalRows, chunkCount, userId } = job.data;
+        const { websetId, totalRows, chunkCount, userId, llmProviderId, searchProviderId, column } = job.data;
 
         this.logger.log(`Processing batch parent enrichment job ${job.id} for ${totalRows} rows in ${chunkCount} chunks`);
+
+        // Create job history record
+        await this.enrichmentHistoryService.createJobRecord(
+            websetId,
+            userId,
+            job.id,
+            {
+                totalRows,
+                chunkCount,
+                llmProviderId,
+                searchProviderId,
+                column,
+                type: 'batch'
+            }
+        );
+
+        // Update job status to running
+        await this.enrichmentHistoryService.updateJobStatus(
+            job.id,
+            EnrichmentJobStatus.RUNNING
+        );
 
         // Monitor progress of child jobs
         const progressInterval = setInterval(async () => {
@@ -136,6 +191,18 @@ export class EnrichmentProcessor extends WorkerHost {
                     totalRows,
                     status: 'completed',
                 });
+
+                // Update job status to completed
+                await this.enrichmentHistoryService.updateJobStatus(
+                    job.id,
+                    EnrichmentJobStatus.COMPLETED,
+                    {
+                        totalRows,
+                        processedRows: totalRows,
+                        chunksProcessed: chunkCount,
+                        successRate: 100,
+                    }
+                );
 
                 // Create a snapshot after job completion
                 try {
@@ -174,6 +241,28 @@ export class EnrichmentProcessor extends WorkerHost {
             throw new Error(`Webset with ID ${websetId} not found`);
         }
 
+        // Create job history record
+        await this.enrichmentHistoryService.createJobRecord(
+            websetId,
+            userId,
+            job.id,
+            {
+                websetId,
+                row,
+                column,
+                prompt,
+                llmProviderId,
+                searchProviderId,
+                type: 'single-row'
+            }
+        );
+
+        // Update job status to running
+        await this.enrichmentHistoryService.updateJobStatus(
+            job.id,
+            EnrichmentJobStatus.RUNNING
+        );
+
         try {
             const result = await this.enrichCellWithSwarm(
                 webset,
@@ -210,6 +299,14 @@ export class EnrichmentProcessor extends WorkerHost {
 
             const savedCell = await this.cellRepository.save(cell);
 
+            // Update job progress
+            await this.enrichmentHistoryService.updateJobProgress(
+                job.id,
+                1, // total rows
+                1, // processed rows
+                0  // failed rows
+            );
+
             // Emit real-time update
             this.enrichmentGateway.sendCellUpdate(websetId, savedCell);
 
@@ -228,9 +325,32 @@ export class EnrichmentProcessor extends WorkerHost {
                 await this.citationRepository.save(citations);
             }
 
+            // Update job status to completed
+            await this.enrichmentHistoryService.updateJobStatus(
+                job.id,
+                EnrichmentJobStatus.COMPLETED,
+                {
+                    processedRows: 1,
+                    successRate: 100,
+                }
+            );
+
             return { success: true, cellId: savedCell.id };
         } catch (error) {
             this.logger.error(`Error enriching row ${row}: ${error.message}`);
+            
+            // Update job status to failed
+            await this.enrichmentHistoryService.updateJobStatus(
+                job.id,
+                EnrichmentJobStatus.FAILED,
+                {
+                    processedRows: 0,
+                    failedRows: 1,
+                    successRate: 0,
+                },
+                error.message
+            );
+            
             throw error;
         }
     }
@@ -259,6 +379,31 @@ export class EnrichmentProcessor extends WorkerHost {
 
         const totalRows = rows.length;
         let completedCount = 0;
+        let failedCount = 0;
+
+        // Create job history record
+        await this.enrichmentHistoryService.createJobRecord(
+            websetId,
+            userId,
+            job.id,
+            {
+                websetId,
+                rows,
+                column,
+                prompt,
+                llmProviderId,
+                searchProviderId,
+                chunkIndex,
+                totalChunks,
+                type: 'chunk'
+            }
+        );
+
+        // Update job status to running
+        await this.enrichmentHistoryService.updateJobStatus(
+            job.id,
+            EnrichmentJobStatus.RUNNING
+        );
 
         for (const rowIdx of rows) {
             try {
@@ -320,10 +465,33 @@ export class EnrichmentProcessor extends WorkerHost {
                 // Update job progress
                 const progress = (completedCount / totalRows) * 100;
                 await job.updateProgress(progress);
+                
+                // Update job progress in history
+                await this.enrichmentHistoryService.updateJobProgress(
+                    job.id,
+                    totalRows,
+                    completedCount,
+                    failedCount
+                );
             } catch (error) {
                 this.logger.error(`Error enriching row ${rowIdx} in chunk ${chunkIndex}: ${error.message}`);
+                failedCount++;
             }
         }
+
+        // Update job status based on results
+        const status = failedCount === 0 ? EnrichmentJobStatus.COMPLETED : EnrichmentJobStatus.FAILED;
+        await this.enrichmentHistoryService.updateJobStatus(
+            job.id,
+            status,
+            {
+                totalRows,
+                processedRows: completedCount,
+                failedRows: failedCount,
+                successRate: (completedCount / totalRows) * 100,
+            },
+            failedCount > 0 ? `Failed to process ${failedCount} of ${totalRows} rows` : undefined
+        );
 
         return {
             success: true,
@@ -358,6 +526,30 @@ export class EnrichmentProcessor extends WorkerHost {
 
         const totalRows = rows.length;
         let completedCount = 0;
+        let failedCount = 0;
+
+        // Create job history record
+        await this.enrichmentHistoryService.createJobRecord(
+            websetId,
+            userId,
+            job.id,
+            {
+                agentId,
+                websetId,
+                rows,
+                column,
+                prompt,
+                llmProviderId,
+                searchProviderId,
+                type: 'agent-work'
+            }
+        );
+
+        // Update job status to running
+        await this.enrichmentHistoryService.updateJobStatus(
+            job.id,
+            EnrichmentJobStatus.RUNNING
+        );
 
         for (const rowIdx of rows) {
             try {
@@ -416,12 +608,35 @@ export class EnrichmentProcessor extends WorkerHost {
                 }
 
                 completedCount++;
+                
+                // Update job progress in history
+                await this.enrichmentHistoryService.updateJobProgress(
+                    job.id,
+                    totalRows,
+                    completedCount,
+                    failedCount
+                );
             } catch (error) {
                 this.logger.error(`Error enriching row ${rowIdx} with agent ${agentId}: ${error.message}`);
+                failedCount++;
             }
         }
 
         this.logger.log(`Agent ${agentId} completed ${completedCount}/${totalRows} rows for webset ${websetId}`);
+
+        // Update job status based on results
+        const status = failedCount === 0 ? EnrichmentJobStatus.COMPLETED : EnrichmentJobStatus.FAILED;
+        await this.enrichmentHistoryService.updateJobStatus(
+            job.id,
+            status,
+            {
+                totalRows,
+                processedRows: completedCount,
+                failedRows: failedCount,
+                successRate: (completedCount / totalRows) * 100,
+            },
+            failedCount > 0 ? `Failed to process ${failedCount} of ${totalRows} rows` : undefined
+        );
 
         // Create a snapshot after job completion
         try {

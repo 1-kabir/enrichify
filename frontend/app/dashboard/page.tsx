@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Upload, Sparkles } from "lucide-react";
+import { Upload, Sparkles, History } from "lucide-react";
 
 export default function DashboardPage() {
     const [isLoading, setIsLoading] = useState(false);
@@ -110,6 +110,45 @@ export default function DashboardPage() {
                             </Card>
                         </div>
                     </div>
+                </div>
+                
+                {/* History Section */}
+                <div className="mt-8">
+                    <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-xl font-bold text-white">Recent Activity</h2>
+                        <Button 
+                            variant="outline" 
+                            className="border-[#333333] text-[#a3a3a3] hover:text-white gap-2"
+                            onClick={() => router.push('/dashboard/history')}
+                        >
+                            <History className="h-4 w-4" />
+                            View All History
+                        </Button>
+                    </div>
+                    <Card className="bg-[#141414] border-[#262626]">
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2 text-white">
+                                <History className="h-5 w-5 text-primary" />
+                                Enrichment History
+                            </CardTitle>
+                            <CardDescription className="text-[#666666]">
+                                View your recent enrichment jobs and their status
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-[#a3a3a3] text-center py-8">
+                                Your enrichment job history will appear here. 
+                                <br />
+                                <Button 
+                                    variant="link" 
+                                    className="text-primary p-0 h-auto mt-2"
+                                    onClick={() => router.push('/dashboard/history')}
+                                >
+                                    View full history
+                                </Button>
+                            </p>
+                        </CardContent>
+                    </Card>
                 </div>
             </AppLayout>
         </ProtectedRoute>
