@@ -8,6 +8,7 @@ import {
   Param,
   UseGuards,
   Request,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { SettingsService, CreateProviderConfigDto, UpdateProviderConfigDto, UpdateDefaultProvidersDto } from './settings.service';
@@ -30,14 +31,14 @@ export class SettingsController {
   @Patch('providers/:id')
   updateProviderConfig(
     @Request() req,
-    @Param('id') id: string,
+    @Param('id', new ParseUUIDPipe()) id: string,
     @Body() updateDto: UpdateProviderConfigDto,
   ) {
     return this.settingsService.updateProviderConfig(req.user.id, id, updateDto);
   }
 
   @Delete('providers/:id')
-  deleteProviderConfig(@Request() req, @Param('id') id: string) {
+  deleteProviderConfig(@Request() req, @Param('id', new ParseUUIDPipe()) id: string) {
     return this.settingsService.deleteProviderConfig(req.user.id, id);
   }
 

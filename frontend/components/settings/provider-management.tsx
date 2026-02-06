@@ -10,10 +10,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { 
-  Plus, 
-  Trash2, 
-  Edit3, 
+import {
+  Plus,
+  Trash2,
+  Edit3,
   KeyRound,
   Search,
   Bot,
@@ -23,62 +23,77 @@ import {
   Settings2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ProviderType } from '@/types/settings';
 
-interface ProviderConfig {
+interface SystemProvider {
   id: string;
-  providerType: ProviderType;
-  providerId: string;
+  name: string;
+  type: string;
+  hasAdminKey: boolean;
+  canUserProvideKey: boolean;
+  isDefaultForUsers: boolean;
+}
+
+interface UserProviderConfig {
+  id: string;
   providerName: string;
-  providerDisplayName: string;
+  systemLlmProviderId?: string;
+  systemSearchProviderId?: string;
+  hasUserKey: boolean;
   isDefault: boolean;
   createdAt: string;
   updatedAt: string;
 }
 
+interface GetUserProvidersResponse {
+  systemProviders: {
+    llm: SystemProvider[];
+    search: SystemProvider[];
+  };
+  userConfigs: UserProviderConfig[];
+}
+
 interface DefaultProviders {
   defaultLlmProviderId: string | null;
   defaultSearchProviderId: string | null;
+  defaultLlmProviderConfigId: string | null;
+  defaultSearchProviderConfigId: string | null;
 }
 
 export function ProviderManagement() {
   const { toast } = useToast();
-  const [providers, setProviders] = useState<ProviderConfig[]>([]);
+  const [providers, setProviders] = useState<UserProviderConfig[]>([]);
+  const [systemProviders, setSystemProviders] = useState<{ llm: SystemProvider[], search: SystemProvider[] }>({ llm: [], search: [] });
   const [defaultProviders, setDefaultProviders] = useState<DefaultProviders>({
     defaultLlmProviderId: null,
     defaultSearchProviderId: null,
+    defaultLlmProviderConfigId: null,
+    defaultSearchProviderConfigId: null,
   });
   const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingProvider, setEditingProvider] = useState<ProviderConfig | null>(null);
+  const [editingProvider, setEditingProvider] = useState<UserProviderConfig | null>(null);
   const [dialogForm, setDialogForm] = useState({
-    providerType: 'llm' as ProviderType,
-    providerId: '',
+    systemLlmProviderId: '',
+    systemSearchProviderId: '',
     providerName: '',
     apiKey: '',
     isDefault: false,
   });
 
-  // Available providers from the backend
-  const [availableProviders, setAvailableProviders] = useState<{
-    llm: { id: string; name: string; type: string }[];
-    search: { id: string; name: string; type: string }[];
-  }>({ llm: [], search: [] });
-
   useEffect(() => {
     loadProviders();
-    loadAvailableProviders();
   }, []);
 
   const loadProviders = async () => {
     try {
       setIsLoading(true);
-      const [configsRes, defaultsRes] = await Promise.all([
+      const [providersRes, defaultsRes] = await Promise.all([
         api.get('/settings/providers'),
         api.get('/settings/defaults'),
       ]);
-      
-      setProviders(configsRes.data);
+
+      setProviders(providersRes.data.userConfigs);
+      setSystemProviders(providersRes.data.systemProviders);
       setDefaultProviders(defaultsRes.data);
     } catch (error) {
       toast({
@@ -91,35 +106,9 @@ export function ProviderManagement() {
     }
   };
 
-  const loadAvailableProviders = async () => {
-    try {
-      // In a real app, we would fetch available providers from the backend
-      // For now, we'll mock this with some sample data
-      // In practice, this would be separate API calls to get available LLM and search providers
-      setAvailableProviders({
-        llm: [
-          { id: 'openai-1', name: 'OpenAI GPT-4', type: 'openai' },
-          { id: 'anthropic-1', name: 'Anthropic Claude', type: 'claude' },
-          { id: 'gemini-1', name: 'Google Gemini', type: 'gemini' },
-        ],
-        search: [
-          { id: 'tavily-1', name: 'Tavily Search', type: 'tavily' },
-          { id: 'exa-1', name: 'Exa AI', type: 'exa' },
-          { id: 'serper-1', name: 'Serper', type: 'serper' },
-        ]
-      });
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to load available providers.',
-        variant: 'destructive',
-      });
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
       if (editingProvider) {
         // Update existing provider
@@ -133,10 +122,18 @@ export function ProviderManagement() {
           description: 'Provider configuration updated successfully.',
         });
       } else {
+        // Determine provider type based on which system provider ID is set
+        const isLlmProvider = !!dialogForm.systemLlmProviderId;
+        const isSearchProvider = !!dialogForm.systemSearchProviderId;
+        
+        if (!isLlmProvider && !isSearchProvider) {
+          throw new Error('Please select a provider from the available system providers');
+        }
+
         // Create new provider
         await api.post('/settings/providers', {
-          providerType: dialogForm.providerType,
-          providerId: dialogForm.providerId,
+          systemLlmProviderId: dialogForm.systemLlmProviderId || undefined,
+          systemSearchProviderId: dialogForm.systemSearchProviderId || undefined,
           providerName: dialogForm.providerName,
           apiKey: dialogForm.apiKey,
           isDefault: dialogForm.isDefault,
@@ -146,14 +143,14 @@ export function ProviderManagement() {
           description: 'Provider configuration added successfully.',
         });
       }
-      
+
       setIsDialogOpen(false);
       resetForm();
       loadProviders();
     } catch (error) {
       toast({
         title: 'Error',
-        description: 'Failed to save provider configuration.',
+        description: error.response?.data?.message || 'Failed to save provider configuration.',
         variant: 'destructive',
       });
     }
@@ -180,15 +177,22 @@ export function ProviderManagement() {
     }
   };
 
-  const handleSetDefault = async (id: string, type: ProviderType) => {
+  const handleSetDefault = async (configId: string) => {
     try {
-      const updateObj: any = {};
-      if (type === 'llm') {
-        updateObj.defaultLlmProviderId = id;
-      } else {
-        updateObj.defaultSearchProviderId = id;
+      // Find the provider config to determine if it's an LLM or search provider
+      const providerConfig = providers.find(p => p.id === configId);
+      if (!providerConfig) {
+        throw new Error('Provider configuration not found');
       }
-      
+
+      // Determine which default field to update based on the system provider ID
+      const updateObj: any = {};
+      if (providerConfig.systemLlmProviderId) {
+        updateObj.defaultLlmProviderConfigId = configId;
+      } else if (providerConfig.systemSearchProviderId) {
+        updateObj.defaultSearchProviderConfigId = configId;
+      }
+
       await api.patch('/settings/defaults', updateObj);
       toast({
         title: 'Success',
@@ -206,8 +210,8 @@ export function ProviderManagement() {
 
   const resetForm = () => {
     setDialogForm({
-      providerType: 'llm',
-      providerId: '',
+      systemLlmProviderId: '',
+      systemSearchProviderId: '',
       providerName: '',
       apiKey: '',
       isDefault: false,
@@ -222,11 +226,11 @@ export function ProviderManagement() {
     setIsDialogOpen(open);
   };
 
-  const handleEdit = (provider: ProviderConfig) => {
+  const handleEdit = (provider: UserProviderConfig) => {
     setEditingProvider(provider);
     setDialogForm({
-      providerType: provider.providerType,
-      providerId: provider.providerId,
+      systemLlmProviderId: provider.systemLlmProviderId || '',
+      systemSearchProviderId: provider.systemSearchProviderId || '',
       providerName: provider.providerName,
       apiKey: '', // Don't expose the API key
       isDefault: provider.isDefault,
@@ -234,12 +238,13 @@ export function ProviderManagement() {
     setIsDialogOpen(true);
   };
 
-  const filteredLlmProviders = availableProviders.llm.filter(
-    p => !providers.some(config => config.providerId === p.id)
+  // Get available system providers that allow user keys and aren't already configured
+  const availableLlmProviders = systemProviders.llm.filter(
+    p => p.canUserProvideKey && !providers.some(config => config.systemLlmProviderId === p.id)
   );
-  
-  const filteredSearchProviders = availableProviders.search.filter(
-    p => !providers.some(config => config.providerId === p.id)
+
+  const availableSearchProviders = systemProviders.search.filter(
+    p => p.canUserProvideKey && !providers.some(config => config.systemSearchProviderId === p.id)
   );
 
   return (
@@ -270,57 +275,57 @@ export function ProviderManagement() {
                 </DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
-                {!editingProvider && (
-                  <div className="space-y-2">
-                    <Label htmlFor="providerType">Provider Type</Label>
-                    <Select 
-                      value={dialogForm.providerType} 
-                      onValueChange={(value: ProviderType) => setDialogForm({...dialogForm, providerType: value})}
-                    >
-                      <SelectTrigger className="bg-[#1a1a1a] border-[#333333]">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="bg-[#1a1a1a] border-[#333333]">
-                        <SelectItem value="llm">LLM Provider</SelectItem>
-                        <SelectItem value="search">Search Provider</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-                
                 <div className="space-y-2">
-                  <Label htmlFor="providerId">Provider</Label>
-                  <Select 
-                    value={dialogForm.providerId} 
-                    onValueChange={(value) => setDialogForm({...dialogForm, providerId: value})}
+                  <Label htmlFor="systemLlmProviderId">LLM Provider</Label>
+                  <Select
+                    value={editingProvider?.systemLlmProviderId || dialogForm.systemLlmProviderId}
+                    onValueChange={(value) => setDialogForm({...dialogForm, systemLlmProviderId: value, systemSearchProviderId: ''})}
+                    disabled={!!editingProvider} // Disable selection when editing
                   >
                     <SelectTrigger className="bg-[#1a1a1a] border-[#333333]">
-                      <SelectValue placeholder="Select a provider" />
+                      <SelectValue placeholder="Select an LLM provider" />
                     </SelectTrigger>
                     <SelectContent className="bg-[#1a1a1a] border-[#333333] max-h-60">
-                      {dialogForm.providerType === 'llm' 
-                        ? filteredLlmProviders.map(p => (
-                            <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
-                          ))
-                        : filteredSearchProviders.map(p => (
-                            <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
-                          ))
-                      }
+                      {availableLlmProviders.map(p => (
+                        <SelectItem key={p.id} value={p.id}>
+                          {p.name} {p.hasAdminKey && <span className="text-xs text-green-500">(Admin Key Available)</span>}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
-                
+
+                <div className="space-y-2">
+                  <Label htmlFor="systemSearchProviderId">Search Provider</Label>
+                  <Select
+                    value={editingProvider?.systemSearchProviderId || dialogForm.systemSearchProviderId}
+                    onValueChange={(value) => setDialogForm({...dialogForm, systemSearchProviderId: value, systemLlmProviderId: ''})}
+                    disabled={!!editingProvider} // Disable selection when editing
+                  >
+                    <SelectTrigger className="bg-[#1a1a1a] border-[#333333]">
+                      <SelectValue placeholder="Select a search provider" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#1a1a1a] border-[#333333] max-h-60">
+                      {availableSearchProviders.map(p => (
+                        <SelectItem key={p.id} value={p.id}>
+                          {p.name} {p.hasAdminKey && <span className="text-xs text-green-500">(Admin Key Available)</span>}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="providerName">Configuration Name</Label>
                   <Input
                     id="providerName"
                     value={dialogForm.providerName}
                     onChange={(e) => setDialogForm({...dialogForm, providerName: e.target.value})}
-                    placeholder="My OpenAI Key"
+                    placeholder="My OpenAI Configuration"
                     className="bg-[#1a1a1a] border-[#333333]"
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="apiKey">API Key</Label>
                   <Input
@@ -328,11 +333,14 @@ export function ProviderManagement() {
                     type="password"
                     value={dialogForm.apiKey}
                     onChange={(e) => setDialogForm({...dialogForm, apiKey: e.target.value})}
-                    placeholder="sk-... or your API key"
+                    placeholder="Enter your API key"
                     className="bg-[#1a1a1a] border-[#333333]"
                   />
+                  <p className="text-xs text-[#666666]">
+                    This key will be encrypted and stored securely
+                  </p>
                 </div>
-                
+
                 <div className="flex items-center space-x-2 pt-2">
                   <input
                     type="checkbox"
@@ -342,14 +350,14 @@ export function ProviderManagement() {
                     className="h-4 w-4 rounded border-[#333333] bg-[#1a1a1a] text-primary focus:ring-primary"
                   />
                   <Label htmlFor="isDefault" className="text-sm font-normal">
-                    Set as default {dialogForm.providerType === 'llm' ? 'LLM' : 'Search'} provider
+                    Set as default provider
                   </Label>
                 </div>
-                
+
                 <div className="flex justify-end space-x-2 pt-4">
-                  <Button 
-                    type="button" 
-                    variant="outline" 
+                  <Button
+                    type="button"
+                    variant="outline"
                     onClick={() => handleDialogOpen(false)}
                     className="border-[#333333] text-[#a3a3a3] hover:text-white"
                   >
@@ -385,75 +393,88 @@ export function ProviderManagement() {
           ) : (
             <div className="space-y-3">
               <AnimatePresence>
-                {providers.map((provider) => (
-                  <motion.div
-                    key={provider.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="flex items-center justify-between p-4 rounded-lg bg-[#1a1a1a] border border-[#262626] group hover:border-primary/30 transition-colors"
-                  >
-                    <div className="flex items-center gap-3">
-                      {provider.providerType === 'llm' ? (
-                        <div className="p-2 rounded-lg bg-blue-500/10">
-                          <Bot className="h-5 w-5 text-blue-500" />
-                        </div>
-                      ) : (
-                        <div className="p-2 rounded-lg bg-green-500/10">
-                          <Search className="h-5 w-5 text-green-500" />
-                        </div>
-                      )}
-                      <div>
-                        <div className="font-medium text-white flex items-center gap-2">
-                          {provider.providerName}
-                          {provider.isDefault && (
-                            <Badge variant="secondary" className="bg-primary/20 text-primary border-primary/30 text-[10px] px-1.5 py-0.5 h-fit">
-                              Default
-                            </Badge>
-                          )}
-                        </div>
-                        <div className="text-xs text-[#a3a3a3]">
-                          {provider.providerDisplayName} • {new Date(provider.createdAt).toLocaleDateString()}
+                {providers.map((provider) => {
+                  // Find the corresponding system provider to get its name and type
+                  const systemProvider = provider.systemLlmProviderId 
+                    ? systemProviders.llm.find(p => p.id === provider.systemLlmProviderId)
+                    : provider.systemSearchProviderId
+                      ? systemProviders.search.find(p => p.id === provider.systemSearchProviderId)
+                      : null;
+
+                  return (
+                    <motion.div
+                      key={provider.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="flex items-center justify-between p-4 rounded-lg bg-[#1a1a1a] border border-[#262626] group hover:border-primary/30 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        {provider.systemLlmProviderId ? (
+                          <div className="p-2 rounded-lg bg-blue-500/10">
+                            <Bot className="h-5 w-5 text-blue-500" />
+                          </div>
+                        ) : (
+                          <div className="p-2 rounded-lg bg-green-500/10">
+                            <Search className="h-5 w-5 text-green-500" />
+                          </div>
+                        )}
+                        <div>
+                          <div className="font-medium text-white flex items-center gap-2">
+                            {provider.providerName}
+                            {provider.isDefault && (
+                              <Badge variant="secondary" className="bg-primary/20 text-primary border-primary/30 text-[10px] px-1.5 py-0.5 h-fit">
+                                Default
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="text-xs text-[#a3a3a3]">
+                            {provider.systemLlmProviderId 
+                              ? systemProviders.llm.find(p => p.id === provider.systemLlmProviderId)?.name || 'Unknown LLM Provider'
+                              : provider.systemSearchProviderId
+                                ? systemProviders.search.find(p => p.id === provider.systemSearchProviderId)?.name || 'Unknown Search Provider'
+                                : 'System Provider'} • {new Date(provider.createdAt).toLocaleDateString()}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    
-                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleSetDefault(provider.id, provider.providerType)}
-                        disabled={provider.isDefault}
-                        className={`h-8 w-8 p-0 ${provider.isDefault ? 'text-[#666666]' : 'text-[#a3a3a3] hover:text-white'}`}
-                        title={provider.isDefault ? 'Default provider' : 'Set as default'}
-                      >
-                        {provider.isDefault ? (
-                          <CheckCircle2 className="h-4 w-4 text-green-500" />
-                        ) : (
-                          <Settings2 className="h-4 w-4" />
-                        )}
-                      </Button>
-                      
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEdit(provider)}
-                        className="h-8 w-8 p-0 text-[#a3a3a3] hover:text-white"
-                      >
-                        <Edit3 className="h-4 w-4" />
-                      </Button>
-                      
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDelete(provider.id)}
-                        className="h-8 w-8 p-0 text-[#a3a3a3] hover:text-red-500"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </motion.div>
-                ))}
+
+                      <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleSetDefault(provider.id)}
+                          disabled={provider.isDefault}
+                          className={`h-8 w-8 p-0 ${provider.isDefault ? 'text-[#666666]' : 'text-[#a3a3a3] hover:text-white'}`}
+                          title={provider.isDefault ? 'Default provider' : 'Set as default'}
+                        >
+                          {provider.isDefault ? (
+                            <CheckCircle2 className="h-4 w-4 text-green-500" />
+                          ) : (
+                            <Settings2 className="h-4 w-4" />
+                          )}
+                        </Button>
+
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEdit(provider)}
+                          className="h-8 w-8 p-0 text-[#a3a3a3] hover:text-white"
+                        >
+                          <Edit3 className="h-4 w-4" />
+                        </Button>
+
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDelete(provider.id)}
+                          className="h-8 w-8 p-0 text-[#a3a3a3] hover:text-red-500"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </motion.div>
+                  );
+                })}
               </AnimatePresence>
             </div>
           )}

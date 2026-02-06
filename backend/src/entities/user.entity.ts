@@ -48,6 +48,13 @@ export class User {
     @Column({ nullable: true })
     defaultSearchProviderId: string;
 
+    // New fields for user provider config defaults
+    @Column({ nullable: true })
+    defaultLlmProviderConfigId: string;
+
+    @Column({ nullable: true })
+    defaultSearchProviderConfigId: string;
+
     @OneToMany(() => UserApiKey, (apiKey) => apiKey.user)
     apiKeys: UserApiKey[];
 

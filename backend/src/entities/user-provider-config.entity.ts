@@ -8,12 +8,6 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { User } from './user.entity';
-import { LLMProviderType, SearchProviderType } from './llm-provider.entity';
-
-export enum ProviderType {
-  LLM = 'llm',
-  SEARCH = 'search',
-}
 
 @Entity('user_provider_configs')
 export class UserProviderConfig {
@@ -27,14 +21,11 @@ export class UserProviderConfig {
   @JoinColumn({ name: 'userId' })
   user: User;
 
-  @Column({
-    type: 'enum',
-    enum: ProviderType,
-  })
-  providerType: ProviderType;
+  @Column({ nullable: true }) // Foreign key to LLMProvider.id
+  systemLlmProviderId?: string;
 
-  @Column()
-  providerId: string; // ID of the provider in the LLM or Search provider table
+  @Column({ nullable: true }) // Foreign key to SearchProvider.id
+  systemSearchProviderId?: string;
 
   @Column()
   providerName: string; // Custom name for the user's provider config

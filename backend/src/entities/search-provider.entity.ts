@@ -43,6 +43,15 @@ export class SearchProvider {
   @Column({ default: true })
   isActive: boolean;
 
+  @Column({ default: true })
+  isAvailableToUsers: boolean;
+
+  @Column({ default: true })
+  canUserProvideKey: boolean;
+
+  @Column({ default: false })
+  isDefaultForUsers: boolean;
+
   @Column({ type: 'jsonb', nullable: true })
   config: Record<string, any>;
 
