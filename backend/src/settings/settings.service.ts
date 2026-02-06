@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Not, IsNull } from 'typeorm';
+import * as crypto from 'crypto';
 import { User } from '../entities/user.entity';
 import { UserProviderConfig } from '../entities/user-provider-config.entity';
 import { LLMProvider } from '../entities/llm-provider.entity';
@@ -391,14 +392,53 @@ export class SettingsService {
   }
 
   private encryptApiKey(apiKey: string): string {
-    // In a real application, implement proper encryption
-    // For now, just return the API key as-is (not recommended for production)
-    return apiKey;
+    if (!process.env.ENCRYPTION_SECRET_KEY) {
+      throw new Error('ENCRYPTION_SECRET_KEY environment variable is not set');
+    }
+
+    // Create a random initialization vector for each encryption
+    const iv = crypto.randomBytes(16);
+    
+    // Create cipher with AES-256-GCM
+    const cipher = crypto.createCipher('aes-256-gcm', process.env.ENCRYPTION_SECRET_KEY);
+    cipher.setAAD(Buffer.from('enrichify-api-key')); // Additional authenticated data
+    
+    let encrypted = cipher.update(apiKey, 'utf8', 'hex');
+    encrypted += cipher.final('hex');
+    
+    // Get authentication tag and return combined result
+    const authTag = cipher.getAuthTag();
+    
+    // Combine IV + AuthTag + EncryptedData and encode as base64
+    const combined = iv.toString('hex') + ':' + authTag.toString('hex') + ':' + encrypted;
+    return Buffer.from(combined).toString('base64');
   }
 
   private decryptApiKey(encryptedApiKey: string): string {
-    // In a real application, implement proper decryption
-    // For now, just return the encrypted key as-is (not recommended for production)
-    return encryptedApiKey;
+    if (!process.env.ENCRYPTION_SECRET_KEY) {
+      throw new Error('ENCRYPTION_SECRET_KEY environment variable is not set');
+    }
+
+    // Decode from base64 and split components
+    const decoded = Buffer.from(encryptedApiKey, 'base64').toString('ascii');
+    const [ivHex, authTagHex, encryptedData] = decoded.split(':');
+    
+    if (!ivHex || !authTagHex || !encryptedData) {
+      throw new Error('Invalid encrypted API key format');
+    }
+
+    // Convert hex strings back to buffers
+    const iv = Buffer.from(ivHex, 'hex');
+    const authTag = Buffer.from(authTagHex, 'hex');
+
+    // Create decipher with AES-256-GCM
+    const decipher = crypto.createDecipher('aes-256-gcm', process.env.ENCRYPTION_SECRET_KEY);
+    decipher.setAAD(Buffer.from('enrichify-api-key')); // Same AAD as encryption
+    decipher.setAuthTag(authTag);
+    
+    let decrypted = decipher.update(encryptedData, 'hex', 'utf8');
+    decrypted += decipher.final('utf8');
+    
+    return decrypted;
   }
 }
