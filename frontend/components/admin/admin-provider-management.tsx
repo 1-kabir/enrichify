@@ -11,8 +11,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { 
   Shield, 
   KeyRound, 
-  Eye, 
-  EyeOff, 
   CheckCircle2, 
   XCircle, 
   Settings2,
@@ -117,7 +115,7 @@ export function AdminProviderManagement() {
         <Skeleton className="h-10 w-64 bg-white/5" />
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {[1, 2, 3, 4].map((i) => (
-            <Skeleton key={i} className="h-32 bg-white/5 rounded-2xl" />
+            <Skeleton key={i} className="h-32 w-full bg-white/5 rounded-2xl" />
           ))}
         </div>
       </div>
