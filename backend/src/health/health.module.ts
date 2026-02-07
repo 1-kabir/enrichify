@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Logger, Module, OnModuleInit } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
 import { HealthService } from './health.service';
 import { HealthController } from './health.controller';
@@ -12,4 +12,10 @@ import { HealthController } from './health.controller';
   controllers: [HealthController],
   providers: [HealthService],
 })
-export class HealthModule {}
+export class HealthModule implements OnModuleInit {
+  private readonly logger = new Logger(HealthModule.name);
+
+  onModuleInit() {
+    this.logger.log('HealthModule initialized');
+  }
+}
