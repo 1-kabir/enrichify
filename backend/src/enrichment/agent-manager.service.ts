@@ -1,6 +1,6 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { InjectQueue, Processor } from '@nestjs/bullmq';
-import { Queue, Worker } from 'bullmq';
+import { InjectQueue, Processor, WorkerHost } from '@nestjs/bullmq';
+import { Queue, Worker, Job } from 'bullmq';
 import { Redis } from 'ioredis';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -28,7 +28,7 @@ export interface AgentHealth {
 
 @Injectable()
 @Processor('agent-manager')
-export class AgentManagerService implements OnModuleInit {
+export class AgentManagerService extends WorkerHost implements OnModuleInit {
   private readonly logger = new Logger(AgentManagerService.name);
   
   private agents: Map<string, AgentAssignment> = new Map();
@@ -44,6 +44,7 @@ export class AgentManagerService implements OnModuleInit {
     private searchProvidersService: SearchProvidersService,
     private enrichmentGateway: EnrichmentGateway,
   ) {
+    super();
     this.redis = new Redis({
       host: process.env.REDIS_HOST || 'localhost',
       port: parseInt(process.env.REDIS_PORT, 10) || 6379,
@@ -264,5 +265,15 @@ export class AgentManagerService implements OnModuleInit {
    */
   getAgentAssignments(): AgentAssignment[] {
     return Array.from(this.agents.values());
+  }
+
+  /**
+   * Required by WorkerHost - process method for BullMQ jobs
+   */
+  async process(job: Job): Promise<any> {
+    this.logger.log(`Processing agent-manager job: ${job.name} [${job.id}]`);
+    // Agent manager doesn't directly process jobs
+    // It delegates work through the enrichment queue
+    return { status: 'delegated' };
   }
 }
