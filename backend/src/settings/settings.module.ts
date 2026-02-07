@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Logger, Module, OnModuleInit } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SettingsController } from './settings.controller';
 import { AdminProviderController } from './admin-provider.controller';
@@ -18,4 +18,10 @@ import { ProvidersModule } from '../providers/providers.module';
   providers: [SettingsService],
   exports: [SettingsService],
 })
-export class SettingsModule {}
+export class SettingsModule implements OnModuleInit {
+  private readonly logger = new Logger(SettingsModule.name);
+
+  onModuleInit() {
+    this.logger.log('SettingsModule initialized');
+  }
+}

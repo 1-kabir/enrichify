@@ -21,10 +21,11 @@ import { Webset } from '../entities/webset.entity';
 import { WebsetCell } from '../entities/webset-cell.entity';
 import { WebsetCitation } from '../entities/webset-citation.entity';
 import { EnrichmentJobHistory } from '../entities/enrichment-job-history.entity';
+import { User } from '../entities/user.entity';
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([Webset, WebsetCell, WebsetCitation, EnrichmentJobHistory]),
+        TypeOrmModule.forFeature([Webset, WebsetCell, WebsetCitation, EnrichmentJobHistory, User]),
         BullModule.registerQueue({
             name: 'enrichment',
             defaultJobOptions: {
