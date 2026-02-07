@@ -55,100 +55,98 @@ export default function DashboardPage() {
     return (
         <ProtectedRoute>
             <AppLayout>
-                <div className="min-h-[80vh] flex flex-col items-center justify-center py-12 px-4">
-                    <div className="max-w-2xl w-full space-y-8">
-                        <div className="text-center space-y-4">
-                            <h1 className="text-3xl font-bold text-white tracking-tight">
-                                Create a New Webset
-                            </h1>
-                            <p className="text-[#a3a3a3]">
-                                Start by describing your data needs or import from a file
-                            </p>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <Card className="bg-[#141414] border-[#262626] hover:border-primary/30 transition-colors">
-                                <CardHeader>
-                                    <CardTitle className="flex items-center gap-2 text-white">
-                                        <Sparkles className="h-5 w-5 text-primary" />
-                                        AI-Powered
-                                    </CardTitle>
-                                    <CardDescription className="text-[#666666]">
-                                        Describe your data needs and let Enrichify plan the structure
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <InputArea onSubmit={handleRequest} isLoading={isLoading} />
-                                </CardContent>
-                            </Card>
-
-                            <Card className="bg-[#141414] border-[#262626] hover:border-primary/30 transition-colors">
-                                <CardHeader>
-                                    <CardTitle className="flex items-center gap-2 text-white">
-                                        <Upload className="h-5 w-5 text-primary" />
-                                        From File
-                                    </CardTitle>
-                                    <CardDescription className="text-[#666666]">
-                                        Import your existing data from CSV, XLS, or XLSX files
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent className="flex flex-col h-full">
-                                    <div className="flex-1 flex flex-col justify-center">
-                                        <p className="text-[#a3a3a3] text-sm mb-4">
-                                            Upload your spreadsheet to create a webset instantly
-                                        </p>
-                                    </div>
-                                    <Button 
-                                        variant="outline" 
-                                        className="border-[#333333] text-[#a3a3a3] hover:text-white gap-2"
-                                        onClick={handleCreateFromFile}
-                                    >
-                                        <Upload className="h-4 w-4" />
-                                        Upload File
-                                    </Button>
-                                </CardContent>
-                            </Card>
-                        </div>
+                <div className="container mx-auto px-4 py-8 max-w-7xl">
+                    {/* Header */}
+                    <div className="text-center space-y-4 mb-12">
+                        <h1 className="text-4xl font-bold text-white tracking-tight">
+                            Create a New Webset
+                        </h1>
+                        <p className="text-[#a3a3a3] text-lg">
+                            Start by describing your data needs or import from a file
+                        </p>
                     </div>
-                </div>
-                
-                {/* History Section */}
-                <div className="mt-8">
-                    <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-xl font-bold text-white">Recent Activity</h2>
-                        <Button 
-                            variant="outline" 
-                            className="border-[#333333] text-[#a3a3a3] hover:text-white gap-2"
-                            onClick={() => router.push('/dashboard/history')}
-                        >
-                            <History className="h-4 w-4" />
-                            View All History
-                        </Button>
-                    </div>
-                    <Card className="bg-[#141414] border-[#262626]">
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2 text-white">
-                                <History className="h-5 w-5 text-primary" />
-                                Enrichment History
-                            </CardTitle>
-                            <CardDescription className="text-[#666666]">
-                                View your recent enrichment jobs and their status
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-[#a3a3a3] text-center py-8">
-                                Your enrichment job history will appear here. 
-                                <br />
+
+                    {/* Creation Options */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto mb-16">
+                        <Card className="bg-[#141414] border-[#262626] hover:border-primary/30 transition-colors">
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2 text-white text-xl">
+                                    <Sparkles className="h-6 w-6 text-primary" />
+                                    AI-Powered
+                                </CardTitle>
+                                <CardDescription className="text-[#666666]">
+                                    Describe your data needs and let Enrichify plan the structure
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <InputArea onSubmit={handleRequest} isLoading={isLoading} />
+                            </CardContent>
+                        </Card>
+
+                        <Card className="bg-[#141414] border-[#262626] hover:border-primary/30 transition-colors">
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2 text-white text-xl">
+                                    <Upload className="h-6 w-6 text-primary" />
+                                    From File
+                                </CardTitle>
+                                <CardDescription className="text-[#666666]">
+                                    Import your existing data from CSV, XLS, or XLSX files
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <p className="text-[#a3a3a3] text-sm">
+                                    Upload your spreadsheet to create a webset instantly
+                                </p>
                                 <Button 
-                                    variant="link" 
-                                    className="text-primary p-0 h-auto mt-2"
-                                    onClick={() => router.push('/dashboard/history')}
+                                    variant="outline" 
+                                    className="w-full border-[#333333] text-[#a3a3a3] hover:text-white hover:border-primary/30 gap-2"
+                                    onClick={handleCreateFromFile}
                                 >
-                                    View full history
+                                    <Upload className="h-4 w-4" />
+                                    Upload File
                                 </Button>
-                            </p>
-                        </CardContent>
-                    </Card>
+                            </CardContent>
+                        </Card>
+                    </div>
+
+                    {/* Recent Activity Section */}
+                    <div className="max-w-5xl mx-auto">
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-2xl font-bold text-white">Recent Activity</h2>
+                            <Button 
+                                variant="outline" 
+                                className="border-[#333333] text-[#a3a3a3] hover:text-white hover:border-primary/30 gap-2"
+                                onClick={() => router.push('/dashboard/history')}
+                            >
+                                <History className="h-4 w-4" />
+                                View All History
+                            </Button>
+                        </div>
+                        <Card className="bg-[#141414] border-[#262626]">
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2 text-white">
+                                    <History className="h-5 w-5 text-primary" />
+                                    Enrichment History
+                                </CardTitle>
+                                <CardDescription className="text-[#666666]">
+                                    View your recent enrichment jobs and their status
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <p className="text-[#a3a3a3] text-center py-8">
+                                    Your enrichment job history will appear here.
+                                    <br />
+                                    <Button 
+                                        variant="link" 
+                                        className="text-primary p-0 h-auto mt-2 hover:underline"
+                                        onClick={() => router.push('/dashboard/history')}
+                                    >
+                                        View full history
+                                    </Button>
+                                </p>
+                            </CardContent>
+                        </Card>
+                    </div>
                 </div>
             </AppLayout>
         </ProtectedRoute>

@@ -76,4 +76,4 @@ tests/screenshots/
 # pnpm-lock.yaml
 .github/copilot-instructions.md
 
-temp/
+temp//temp/
