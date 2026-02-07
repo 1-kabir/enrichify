@@ -87,13 +87,14 @@ export class EnrichmentService {
       throw new ForbiddenException('You do not have permission to control this job');
     }
 
-    // Check if job can be paused
+    // Check if job can be paused (use queue methods instead)
     const state = await job.getState();
     if (state !== 'active' && state !== 'waiting' && state !== 'delayed') {
       throw new BadRequestException(`Job cannot be paused in state: ${state}`);
     }
 
-    await job.pause();
+    // BullMQ doesn't have pause on individual jobs, we can only pause the queue
+    throw new BadRequestException('Individual job pause is not supported. Use queue pause instead.');
   }
 
   async resumeJob(jobId: string, userId: string): Promise<void> {
@@ -114,11 +115,12 @@ export class EnrichmentService {
 
     // Check if job can be resumed
     const state = await job.getState();
-    if (state !== 'paused') {
+    if (state === 'completed' || state === 'failed') {
       throw new BadRequestException(`Job cannot be resumed in state: ${state}`);
     }
 
-    await job.resume();
+    // BullMQ doesn't have resume on individual jobs
+    throw new BadRequestException('Individual job resume is not supported.');
   }
 
   async stopJob(jobId: string, userId: string): Promise<void> {
@@ -139,8 +141,8 @@ export class EnrichmentService {
 
     // Check if job can be stopped
     const state = await job.getState();
-    if (state === 'completed' || state === 'failed' || state === 'removed') {
-      throw new BadRequestException(`Job cannot be stopped in state: ${state}`);
+    if (state === 'completed' || state === 'failed') {
+      throw new BadRequestException(`Job is already in final state: ${state}`);
     }
 
     await job.remove();

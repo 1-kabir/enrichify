@@ -5,8 +5,8 @@
  */
 
 import { Injectable, Logger } from '@nestjs/common';
-import { MonitoringService } from '../src/enrichment/monitoring.service';
-import { SwarmMetrics } from '../src/enrichment/monitoring.service';
+import { MonitoringService } from './monitoring.service';
+import { SwarmMetrics } from './monitoring.service';
 
 @Injectable()
 export class OptimizationService {

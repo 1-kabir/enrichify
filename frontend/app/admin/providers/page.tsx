@@ -3,7 +3,7 @@
 import { AppLayout } from '@/components/layout/app-layout';
 import { ProtectedRoute } from '@/components/protected-route';
 import { AdminProviderManagement } from '@/components/admin/admin-provider-management';
-import { useAuth } from '@/hooks/use-auth';
+import { useAuth } from '@/contexts/auth-context';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { toast } from '@/hooks/use-toast';

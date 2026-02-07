@@ -1,5 +1,5 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { InjectQueue, Process, Processor } from '@nestjs/bullmq';
+import { InjectQueue, Processor } from '@nestjs/bullmq';
 import { Queue, Worker } from 'bullmq';
 import { Redis } from 'ioredis';
 import { InjectRepository } from '@nestjs/typeorm';

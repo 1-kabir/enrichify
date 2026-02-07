@@ -30,6 +30,7 @@ interface SystemProvider {
   hasAdminKey: boolean;
   canUserProvideKey: boolean;
   isDefaultForUsers: boolean;
+  isAvailableToUsers: boolean;
 }
 
 interface UserProviderConfig {

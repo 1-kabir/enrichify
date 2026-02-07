@@ -531,8 +531,7 @@ export default function WebsetPage() {
                     />
 
                     <ProviderSelector
-                        llmProviders={llmProviders}
-                        searchProviders={searchProviders}
+                        websetId={websetId}
                         selectedLLM={selectedLLM}
                         selectedSearch={selectedSearch}
                         onSelect={handleProviderSelect}

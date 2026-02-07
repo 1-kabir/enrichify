@@ -23,6 +23,9 @@ describe('LLMProvidersService', () => {
     usages: [],
     createdAt: new Date(),
     updatedAt: new Date(),
+    isAvailableToUsers: true,
+    canUserProvideKey: false,
+    isDefaultForUsers: false,
   };
 
   beforeEach(async () => {

@@ -132,7 +132,7 @@ export default function NewWebsetPage() {
       setUploadStatus('error');
       toast({
         title: 'Upload Failed',
-        description: error.response?.data?.message || 'An error occurred during upload',
+        description: (error as any).response?.data?.message || 'An error occurred during upload',
         variant: 'destructive',
       });
     } finally {

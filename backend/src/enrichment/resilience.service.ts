@@ -260,7 +260,7 @@ export class ResilienceService {
       this.logger.log(`Reassigned job ${record.jobId} to agent ${newAgent.agentId}`);
       
       // Update the failure record
-      const updatedRecord = { ...record, status: 'recovered' };
+      const updatedRecord = { ...record, status: 'recovered' as const };
       this.failureRecords.set(record.jobId, updatedRecord);
     } else {
       this.logger.warn(`No available agents to reassign job ${record.jobId}`);

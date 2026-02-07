@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { RolesGuard } from '../guards/roles.guard';
-import { Roles } from '../decorators/roles.decorator';
+import { Roles } from '../guards/roles.decorator';
 import { UserRole } from '../entities/user.entity';
 import { SettingsService } from './settings.service';
 

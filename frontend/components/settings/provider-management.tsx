@@ -150,7 +150,7 @@ export function ProviderManagement() {
     } catch (error) {
       toast({
         title: 'Error',
-        description: error.response?.data?.message || 'Failed to save provider configuration.',
+        description: (error as any).response?.data?.message || 'Failed to save provider configuration.',
         variant: 'destructive',
       });
     }

@@ -200,25 +200,4 @@ export class EnrichmentHistoryService {
       order: { startTime: 'DESC' },
     });
   }
-
-  async updateJobProgress(
-    jobId: string,
-    totalRows?: number,
-    processedRows?: number,
-    failedRows?: number,
-  ): Promise<EnrichmentJobHistory> {
-    const jobRecord = await this.enrichmentJobHistoryRepository.findOne({
-      where: { jobId },
-    });
-
-    if (!jobRecord) {
-      throw new Error(`Job record with ID ${jobId} not found`);
-    }
-
-    if (totalRows !== undefined) jobRecord.totalRows = totalRows;
-    if (processedRows !== undefined) jobRecord.processedRows = processedRows;
-    if (failedRows !== undefined) jobRecord.failedRows = failedRows;
-
-    return this.enrichmentJobHistoryRepository.save(jobRecord);
-  }
 }

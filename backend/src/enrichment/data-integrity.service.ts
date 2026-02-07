@@ -149,8 +149,8 @@ export class DataIntegrityService {
       }
       
       // If using version checking, verify it hasn't changed
-      if (expectedVersion !== undefined && cell.version !== expectedVersion) {
-        this.logger.warn(`Cell version mismatch for ${resource}, expected ${expectedVersion}, got ${cell.version}`);
+      if (expectedVersion !== undefined && cell.versionId !== String(expectedVersion)) {
+        this.logger.warn(`Cell version mismatch for ${resource}, expected ${expectedVersion}, got ${cell.versionId}`);
         return false;
       }
       

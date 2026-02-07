@@ -89,7 +89,7 @@ export function VerificationDialog({ websetId, isOpen, onClose }: VerificationDi
         title: "Verification Complete",
         description: result.isValid 
           ? "No issues found in your webset!" 
-          : `Found ${Object.values(result.issues).reduce((sum, count) => sum + count, 0)} issues`,
+          : `Found ${Object.values(result.issues).reduce((sum, count) => (sum as number) + (count as number), 0)} issues`,
       });
     } catch (error) {
       console.error('Verification failed:', error);

@@ -4,7 +4,11 @@ import { HealthService } from './health.service';
 import { HealthController } from './health.controller';
 
 @Module({
-  imports: [BullModule],
+  imports: [
+    BullModule.registerQueue({
+      name: 'enrichment',
+    }),
+  ],
   controllers: [HealthController],
   providers: [HealthService],
 })
