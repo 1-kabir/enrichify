@@ -1,5 +1,8 @@
 "use client";
 
+// Force client-side rendering to avoid SSR/RSC auth issues
+export const dynamic = 'force-dynamic';
+
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { io } from "socket.io-client";
