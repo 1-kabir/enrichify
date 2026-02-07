@@ -2,11 +2,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: "standalone",
-  experimental: {
-    typedRoutes: false,
-  },
   // Fix for reverse proxy origin header issues
   skipTrailingSlashRedirect: true,
+  // Empty turbopack config to silence webpack warning
+  turbopack: {},
 };
 
 module.exports = nextConfig;

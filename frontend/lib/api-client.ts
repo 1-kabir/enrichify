@@ -71,12 +71,16 @@ class ApiClient {
   setAuthToken(token: string) {
     if (typeof window !== "undefined") {
       localStorage.setItem("auth_token", token);
+      // Also set as cookie for SSR/RSC requests
+      document.cookie = `auth_token=${token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Strict`;
     }
   }
 
   clearAuthToken() {
     if (typeof window !== "undefined") {
       localStorage.removeItem("auth_token");
+      // Clear cookie
+      document.cookie = "auth_token=; path=/; max-age=0";
     }
   }
 
